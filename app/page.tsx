@@ -368,6 +368,16 @@ const episodes = [
   },
 ];
 
+const freeEpisode = {
+  ep: '第 8 集',
+  title: '免费卡点：纹章亮起',
+  words: 744,
+  duration: '2 分 40 秒',
+  hook: '女主签下婚姻协议前，母亲留下的纹章突然亮起。',
+  script:
+    'INT. 庄园书房 - 夜\nNatalie 的笔尖停在婚姻协议最后一页。Alessio 站在她身后，没有催促。\nNATALIE：签下它，我会失去什么？\nALESSIO：你现在还没有资格问这个问题。\n她低头看向母亲留下的项链。蓝宝石忽然裂开，一道古老纹章映在协议上。\n墙后的暗门应声打开，里面挂着一幅母亲年轻时的画像。画像里的女人，正戴着 Moretti 家族的戒指。\nNatalie 抬头，脸色发白。\nNATALIE：你早就知道我母亲来过这里？\nAlessio 的沉默比回答更危险。门外传来继妹的声音。\nELLE：姐姐，签完字，你就会知道自己到底是谁。',
+};
+
 export default function Home() {
   const [step, setStep] = useState<StepId>('create');
   const [productionType, setProductionType] = useState<ProductionType>('AI 剧');
@@ -1382,6 +1392,25 @@ function ResultStep({
   mode: GenerationMode;
   selectedHit: HitShow | null;
 }) {
+  const [logline, setLogline] = useState(
+    '婚礼当天被未婚夫背叛的新娘，意外救下被追杀的黑帮继承人，却发现自己是解除他家族诅咒的唯一钥匙。',
+  );
+  const [storySummary, setStorySummary] = useState(
+    'Natalie 原本以为婚礼能拯救破产家族，却在婚礼前听见未婚夫和继妹合谋骗取信托。她被追杀中的 Alessio 卷入危险关系，随后发现母亲留下的纹章与 Moretti 家族诅咒有关。为了夺回继承权，她接受契约婚姻，也把自己推向一个更危险、更迷人的男人。',
+  );
+  const [sellingPoints, setSellingPoints] = useState(
+    '婚礼背叛、危险男人救场、契约婚姻、家族诅咒、女主身份价值反转。',
+  );
+  const [freeHook, setFreeHook] = useState('女主即将签下婚姻协议时，母亲纹章亮起');
+  const [evaluationStatus, setEvaluationStatus] = useState<'已评估' | '待重新评估'>('已评估');
+  const [evaluationVersion, setEvaluationVersion] = useState(1);
+
+  const markEdited = () => setEvaluationStatus('待重新评估');
+  const reevaluate = () => {
+    setEvaluationStatus('已评估');
+    setEvaluationVersion((version) => version + 1);
+  };
+
   return (
     <div className="grid gap-5">
       <SectionTitle
@@ -1400,31 +1429,46 @@ function ResultStep({
       <div className="grid grid-cols-[1fr_320px] gap-5 max-xl:grid-cols-1">
         <Panel title="方案 A：The Bride Claimed by the Cursed Heir">
           <div className="space-y-4">
-            <InfoBlock
+            <EditableInfoBlock
               label="Logline"
-              text="婚礼当天被未婚夫背叛的新娘，意外救下被追杀的黑帮继承人，却发现自己是解除他家族诅咒的唯一钥匙。"
+              value={logline}
+              onChange={(value) => { setLogline(value); markEdited(); }}
             />
-            <InfoBlock
+            <EditableInfoBlock
               label="故事简介"
-              text="Natalie 原本以为婚礼能拯救破产家族，却在婚礼前听见未婚夫和继妹合谋骗取信托。她被追杀中的 Alessio 卷入危险关系，随后发现母亲留下的纹章与 Moretti 家族诅咒有关。为了夺回继承权，她接受契约婚姻，也把自己推向一个更危险、更迷人的男人。"
+              value={storySummary}
+              onChange={(value) => { setStorySummary(value); markEdited(); }}
             />
-            <InfoBlock
+            <EditableInfoBlock
               label="核心卖点"
-              text="婚礼背叛、危险男人救场、契约婚姻、家族诅咒、女主身份价值反转。"
+              value={sellingPoints}
+              onChange={(value) => { setSellingPoints(value); markEdited(); }}
             />
+          </div>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[#eadfce] pt-3">
+            <span className={`text-sm ${evaluationStatus === '已评估' ? 'text-[#4d7b4a]' : 'text-[#9d321d]'}`}>
+              {evaluationStatus} · 第 {evaluationVersion} 次方案评估
+            </span>
+            <button onClick={reevaluate} className="rounded-md bg-[#201b16] px-3 py-2 text-sm font-semibold text-white">
+              重新评估方案
+            </button>
           </div>
         </Panel>
         <Panel title="免费卡点">
           <div className="rounded-lg bg-[#201b16] p-4 text-white">
             <p className="text-xs text-[#d7c7b4]">第 8 集结尾</p>
-            <h3 className="mt-1 text-lg font-semibold">女主即将签下婚姻协议时，母亲纹章亮起</h3>
+            <textarea
+              value={freeHook}
+              onChange={(event) => { setFreeHook(event.target.value); markEdited(); }}
+              className="mt-1 min-h-16 w-full resize-y bg-transparent text-lg font-semibold text-white outline-none placeholder:text-[#d7c7b4]"
+            />
             <p className="mt-3 text-sm leading-6 text-[#eadfce]">
               观众已经想看女主复仇，也想知道她与男主诅咒的关系。卡在“签还是不签”的瞬间，付费驱动力来自身份谜团和关系绑定。
             </p>
           </div>
           <div className="mt-4 grid gap-2 text-sm">
-            <Metric label="爆款潜力" value="86" />
-            <Metric label="付费点强度" value="92" />
+            <Metric label="爆款潜力" value={evaluationStatus === '已评估' ? '88' : '86'} />
+            <Metric label="付费点强度" value={evaluationStatus === '已评估' ? '94' : '92'} />
             <Metric label="相似度风险" value="31" />
           </div>
         </Panel>
@@ -1464,12 +1508,37 @@ function ResultStep({
 
 function ScriptStep() {
   const [selected, setSelected] = useState(0);
+  const allEpisodes = [...episodes, freeEpisode];
+  const [drafts, setDrafts] = useState(() => allEpisodes.map((episode) => episode.script));
+  const [evaluationStatus, setEvaluationStatus] = useState<'已评估' | '待重新评估'>('已评估');
+  const [evaluationVersion, setEvaluationVersion] = useState(1);
+  const currentEpisode = allEpisodes[selected];
+  const currentDraft = drafts[selected] ?? currentEpisode.script;
+
+  const updateDraft = (value: string) => {
+    setDrafts((items) => items.map((item, index) => (index === selected ? value : item)));
+    setEvaluationStatus('待重新评估');
+  };
+
+  const applyAction = (action: string) => {
+    setEvaluationStatus('待重新评估');
+    if (action === '压缩字数') {
+      updateDraft(`${currentDraft}\n\n[已标记：请压缩重复动作与说明，保留结尾卡点]`);
+    } else if (action === '增强付费欲望') {
+      updateDraft(`${currentDraft}\n\n[已标记：请在结尾增加身份揭示或关系不可逆变化]`);
+    }
+  };
+
+  const reevaluate = () => {
+    setEvaluationStatus('已评估');
+    setEvaluationVersion((version) => version + 1);
+  };
 
   return (
     <div className="grid grid-cols-[260px_minmax(0,1fr)] gap-5 max-lg:grid-cols-1">
       <Panel title="集数导航">
         <div className="grid gap-2">
-          {episodes.map((episode, index) => (
+          {allEpisodes.map((episode, index) => (
             <button
               key={episode.ep}
               onClick={() => setSelected(index)}
@@ -1491,28 +1560,43 @@ function ScriptStep() {
           生成到免费集
         </button>
       </Panel>
-      <Panel title={`${episodes[selected].ep}：${episodes[selected].title}`}>
-        <div className="mb-4 flex flex-wrap gap-2">
+      <Panel title={`${currentEpisode.ep}：${currentEpisode.title}`}>
+        <div className="mb-4 flex flex-wrap items-center gap-2">
           {['局部改写', '强化冲突', '修复逻辑', '压缩字数', '增强付费欲望'].map(
             (action) => (
               <button
                 key={action}
+                onClick={() => applyAction(action)}
                 className="rounded-md border border-[#c9bba8] bg-white px-3 py-2 text-sm"
               >
                 {action}
               </button>
             ),
           )}
+          <span className={`ml-auto text-sm ${evaluationStatus === '已评估' ? 'text-[#4d7b4a]' : 'text-[#9d321d]'}`}>
+            {evaluationStatus} · 第 {evaluationVersion} 次评估
+          </span>
         </div>
         <div className="rounded-lg border border-[#ded6c8] bg-[#fffdf9] p-4">
           <div className="mb-4 flex flex-wrap gap-2 text-xs text-[#6b5f52]">
-            <span>{episodes[selected].words} 字</span>
-            <span>{episodes[selected].duration}</span>
-            <span>结尾卡点：{episodes[selected].hook}</span>
+            <span>{currentDraft.length} 字符 · 目标 {currentEpisode.words} 字</span>
+            <span>{currentEpisode.duration}</span>
+            <span>结尾卡点：{currentEpisode.hook}</span>
           </div>
-          <pre className="whitespace-pre-wrap font-sans text-[15px] leading-8 text-[#2d261f]">
-            {episodes[selected].script}
-          </pre>
+          <textarea
+            value={currentDraft}
+            onChange={(event) => updateDraft(event.target.value)}
+            className="min-h-[520px] w-full resize-y bg-transparent font-sans text-[15px] leading-8 text-[#2d261f] outline-none"
+            aria-label={`${currentEpisode.ep} 剧本正文`}
+          />
+        </div>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-[#d8cdbc] bg-[#f8f2e9] px-3 py-3">
+          <div className="text-sm text-[#5d5147]">
+            <strong>自动评估：</strong> 检查逻辑连续性、单集节奏、结尾卡点、付费驱动力和制作复杂度。
+          </div>
+          <button onClick={reevaluate} className="rounded-md bg-[#201b16] px-3 py-2 text-sm font-semibold text-white">
+            保存修改并重新评估
+          </button>
         </div>
       </Panel>
     </div>
@@ -1788,6 +1872,27 @@ function InfoBlock({ label, text }: { label: string; text: string }) {
       <p className="text-xs font-semibold text-[#9d321d]">{label}</p>
       <p className="mt-1 text-sm leading-7 text-[#3b3229]">{text}</p>
     </div>
+  );
+}
+
+function EditableInfoBlock({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="text-xs font-semibold text-[#9d321d]">{label}</span>
+      <textarea
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="mt-1 min-h-16 w-full resize-y rounded-md border border-[#d8cdbc] bg-[#fffdf9] px-3 py-2 text-sm leading-6 text-[#3b3229] outline-none focus:border-[#cf4f35]"
+      />
+    </label>
   );
 }
 
