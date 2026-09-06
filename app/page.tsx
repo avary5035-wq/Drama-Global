@@ -29,6 +29,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 type ProductionType = 'AI 剧' | '真人剧';
 type GenerationMode = '结构事件库组合' | '爆款迭代';
+type ContentTrack = '女频爱情剧' | '女频逆袭爽剧';
 type StepId = 'create' | 'brief' | 'beats' | 'result' | 'script';
 type BeatKey =
   | '原生困境'
@@ -111,6 +112,7 @@ const emotionModes = [
 type HitShow = {
   id: string;
   title: string;
+  genre: string;
   platform: string;
   updated: string;
   episodes: string;
@@ -123,6 +125,7 @@ const hitShows: HitShow[] = [
   {
     id: 'hit-1',
     title: 'The Bride Claimed by the Cursed Heir',
+    genre: '女频爱情剧',
     platform: 'ReelShort',
     updated: '今日更新',
     episodes: '60 集 · 免费第 8 集',
@@ -133,6 +136,7 @@ const hitShows: HitShow[] = [
   {
     id: 'hit-2',
     title: 'My Alpha’s Rejected Mate',
+    genre: '女频爱情剧',
     platform: 'DramaBox',
     updated: '昨日更新',
     episodes: '72 集 · 免费第 10 集',
@@ -143,6 +147,7 @@ const hitShows: HitShow[] = [
   {
     id: 'hit-3',
     title: 'The Billionaire’s Secret Baby',
+    genre: '女频爱情剧',
     platform: 'ShortMax',
     updated: '3 天前',
     episodes: '48 集 · 免费第 7 集',
@@ -153,12 +158,46 @@ const hitShows: HitShow[] = [
   {
     id: 'hit-4',
     title: 'Married to My Enemy King',
+    genre: '女频爱情剧',
     platform: 'NetShort',
     updated: '本周热门',
     episodes: '80 集 · 免费第 9 集',
     tags: ['王室权谋', '仇人共谋', '强制爱'],
     score: '84',
     hook: '家国仇恨 → 敌国联姻 → 王位反转',
+  },
+  {
+    id: 'hit-5',
+    title: 'The Heiress Returns to Ruin Them All',
+    genre: '女频逆袭爽剧',
+    platform: 'ShortMax',
+    updated: '今日新入库',
+    episodes: '56 集 · 免费第 8 集',
+    tags: ['真假千金', '复仇打脸', '身份逆袭'],
+    score: '91',
+    hook: '被逐出家门 → 隐藏身份回归 → 公开清算全家',
+  },
+  {
+    id: 'hit-6',
+    title: 'The Emperor’s Hidden Blade',
+    genre: '其他类型',
+    platform: 'DramaBox',
+    updated: '本周热门',
+    episodes: '64 集 · 免费第 9 集',
+    tags: ['权谋', '复仇', '隐藏身份'],
+    score: '88',
+    hook: '被迫称臣 → 掌握底牌 → 反转夺权',
+  },
+  {
+    id: 'hit-7',
+    title: 'The Locked Room Witness',
+    genre: '其他类型',
+    platform: 'FlexTV',
+    updated: '昨日更新',
+    episodes: '42 集 · 免费第 6 集',
+    tags: ['悬疑', '密室', '身份谜案'],
+    score: '85',
+    hook: '唯一目击者 → 被迫合作 → 真凶即将现身',
   },
 ];
 
@@ -333,6 +372,7 @@ export default function Home() {
   const [step, setStep] = useState<StepId>('create');
   const [productionType, setProductionType] = useState<ProductionType>('AI 剧');
   const [mode, setMode] = useState<GenerationMode>('结构事件库组合');
+  const [contentTrack, setContentTrack] = useState<ContentTrack>('女频爱情剧');
   const [selectedHitId, setSelectedHitId] = useState<string | null>(null);
   const [customHit, setCustomHit] = useState<HitShow | null>(null);
   const [beatSequence, setBeatSequence] = useState<BeatInstance[]>(
@@ -435,6 +475,7 @@ export default function Home() {
                 step,
                 productionType,
                 mode,
+                contentTrack,
                 selectedHitId,
                 selectedHit:
                   (selectedHitId === 'custom-hit'
@@ -463,6 +504,7 @@ export default function Home() {
               properties: {
                 productionType: { enum: ['AI 剧', '真人剧'] },
                 mode: { enum: ['结构事件库组合', '爆款迭代'] },
+                contentTrack: { enum: ['女频爱情剧', '女频逆袭爽剧'] },
                 selectedHitId: { type: 'string' },
                 step: {
                   enum: ['create', 'brief', 'beats', 'result', 'script'],
@@ -484,6 +526,7 @@ export default function Home() {
               const value = input as {
                 productionType?: ProductionType;
                 mode?: GenerationMode;
+                contentTrack?: ContentTrack;
                 selectedHitId?: string | null;
                 step?: StepId;
                 selectedBeat?: BeatKey;
@@ -491,6 +534,7 @@ export default function Home() {
               };
               if (value.productionType) setProductionType(value.productionType);
               if (value.mode) setMode(value.mode);
+              if (value.contentTrack) setContentTrack(value.contentTrack);
               if (value.selectedHitId !== undefined) setSelectedHitId(value.selectedHitId);
               if (value.step) setStep(value.step);
               if (value.selectedBeatId) setSelectedBeatId(value.selectedBeatId);
@@ -509,7 +553,7 @@ export default function Home() {
     }
 
     return () => lifecycle.abort();
-  }, [beatSequence, customHit, locked, mode, productionType, selectedBeat, selectedBeatId, selectedHitId, step]);
+  }, [beatSequence, contentTrack, customHit, locked, mode, productionType, selectedBeat, selectedBeatId, selectedHitId, step]);
 
   return (
     <main className="min-h-screen bg-[#f6f4ef] text-[#201b16]">
@@ -572,6 +616,7 @@ export default function Home() {
               <div className="flex items-center gap-2">
                 <Pill active>{productionType}</Pill>
                 <Pill active>{mode}</Pill>
+                {mode === '结构事件库组合' && <Pill active>{contentTrack}</Pill>}
                 <button className="rounded-md border border-[#c9bba8] bg-white px-3 py-2 text-sm font-medium">
                   保存草稿
                 </button>
@@ -613,6 +658,8 @@ export default function Home() {
                 setProductionType={setProductionType}
                 mode={mode}
                 setMode={setMode}
+                contentTrack={contentTrack}
+                setContentTrack={setContentTrack}
                 selectedHitId={selectedHitId}
                 setSelectedHitId={setSelectedHitId}
                 customHit={customHit}
@@ -624,6 +671,7 @@ export default function Home() {
               <BriefStep
                 productionType={productionType}
                 mode={mode}
+                contentTrack={contentTrack}
                 selectedHit={selectedHitId === 'custom-hit' ? customHit : hitShows.find((item) => item.id === selectedHitId) ?? null}
                 tone={tone}
                 setTone={setTone}
@@ -667,6 +715,8 @@ function CreateStep({
   setProductionType,
   mode,
   setMode,
+  contentTrack,
+  setContentTrack,
   selectedHitId,
   setSelectedHitId,
   customHit,
@@ -677,6 +727,8 @@ function CreateStep({
   setProductionType: (value: ProductionType) => void;
   mode: GenerationMode;
   setMode: (value: GenerationMode) => void;
+  contentTrack: ContentTrack;
+  setContentTrack: (value: ContentTrack) => void;
   selectedHitId: string | null;
   setSelectedHitId: (value: string) => void;
   customHit: HitShow | null;
@@ -689,6 +741,7 @@ function CreateStep({
   const [uploadLink, setUploadLink] = useState('');
   const [fileName, setFileName] = useState('');
   const [parseStatus, setParseStatus] = useState('');
+  const [genreFilter, setGenreFilter] = useState('全部类型');
 
   const parseUploadedReference = () => {
     const hasInput = uploadKind === 'link' ? uploadLink.trim() : uploadKind === 'text' ? uploadText.trim() || fileName : fileName;
@@ -751,6 +804,34 @@ function CreateStep({
           onClick={() => setMode('爆款迭代')}
         />
       </div>
+      {mode === '结构事件库组合' && (
+        <Panel title="选择内容赛道">
+          <p className="mb-3 text-sm leading-6 text-[#6b5f52]">
+            模式 A 会根据赛道加载不同的 Beat 模板、事件库和人物功能库。通用事件可以被多个赛道复用，但在不同赛道中会映射到不同的叙事功能。
+          </p>
+          <div className="grid grid-cols-2 gap-3 max-md:grid-cols-1">
+            <TrackCard
+              active={contentTrack === '女频爱情剧'}
+              title="女频爱情剧"
+              status="已配置"
+              desc="婚恋关系、宿命羁绊、救援绑定、身份秘密和情绪拉扯。"
+              onClick={() => setContentTrack('女频爱情剧')}
+            />
+            <TrackCard
+              active={contentTrack === '女频逆袭爽剧'}
+              title="女频逆袭爽剧"
+              status="Beat 模板建设中"
+              desc="真假身份、公开打脸、阶层逆袭、复仇清算和能力证明。"
+              onClick={() => setContentTrack('女频逆袭爽剧')}
+            />
+          </div>
+          {contentTrack === '女频逆袭爽剧' && (
+            <div className="mt-3 rounded-md border border-[#ead2c2] bg-[#fff7f0] px-3 py-2 text-sm leading-6 text-[#66584b]">
+              该赛道已经预留入口，但当前版本还没有正式的 Beat 模板和事件映射，暂时只能保存方向，不能生成完整故事。
+            </div>
+          )}
+        </Panel>
+      )}
       {mode === '爆款迭代' && (
         <Panel title="先选择要迭代的爆款剧">
           <div className="mb-3 flex items-center justify-between gap-3">
@@ -851,8 +932,20 @@ function CreateStep({
               <p className="mt-1 text-xs text-[#6b5f52]">点击继续使用这部待解析爆款</p>
             </button>
           )}
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <span className="text-xs font-medium text-[#817363]">案例类型</span>
+            {['全部类型', '女频爱情剧', '女频逆袭爽剧', '其他类型'].map((genre) => (
+              <button
+                key={genre}
+                onClick={() => setGenreFilter(genre)}
+                className={`rounded-full border px-2.5 py-1 text-xs ${genreFilter === genre ? 'border-[#cf4f35] bg-[#fff0ea] text-[#9d321d]' : 'border-[#d8cdbc] bg-white text-[#64584c]'}`}
+              >
+                {genre}
+              </button>
+            ))}
+          </div>
           <div className="grid grid-cols-2 gap-3 max-lg:grid-cols-1">
-            {hitShows.map((hit) => (
+            {hitShows.filter((hit) => genreFilter === '全部类型' || hit.genre === genreFilter).map((hit) => (
               <button
                 key={hit.id}
                 onClick={() => setSelectedHitId(hit.id)}
@@ -864,7 +957,7 @@ function CreateStep({
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-xs font-semibold text-[#9d321d]">{hit.platform} · {hit.updated}</p>
+                    <p className="text-xs font-semibold text-[#9d321d]">{hit.genre} · {hit.platform} · {hit.updated}</p>
                     <h3 className="mt-1 font-semibold">{hit.title}</h3>
                   </div>
                   <span className="rounded-full bg-[#201b16] px-2 py-1 text-xs text-white">{hit.score} 分</span>
@@ -888,7 +981,7 @@ function CreateStep({
           disabled={mode === '爆款迭代' && !selectedHitId}
           className="flex items-center gap-2 rounded-md bg-[#cf4f35] px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-45"
         >
-          {mode === '爆款迭代' && !selectedHitId ? '先选择参考爆款' : '进入 Brief'}
+          {mode === '爆款迭代' && !selectedHitId ? '先选择参考爆款' : contentTrack === '女频逆袭爽剧' && mode === '结构事件库组合' ? '进入配置预览' : '进入 Brief'}
           <ChevronRight size={16} />
         </button>
       </div>
@@ -899,6 +992,7 @@ function CreateStep({
 function BriefStep({
   productionType,
   mode,
+  contentTrack,
   selectedHit,
   tone,
   setTone,
@@ -906,6 +1000,7 @@ function BriefStep({
 }: {
   productionType: ProductionType;
   mode: GenerationMode;
+  contentTrack: ContentTrack;
   selectedHit: HitShow | null;
   tone: string;
   setTone: (value: string) => void;
@@ -929,13 +1024,21 @@ function BriefStep({
     <div className="grid gap-5">
       <SectionTitle
         eyebrow="Step 2"
-        title={mode === '爆款迭代' ? '锁定爆款骨架，只替换可变设定' : '用四个维度配置 Brief'}
+        title={mode === '爆款迭代' ? '锁定爆款骨架，只替换可变设定' : contentTrack === '女频逆袭爽剧' ? '女频逆袭爽剧配置预览' : '用四个维度配置 Brief'}
         text={
           mode === '爆款迭代'
             ? '模式 B 会继承参考剧的关系设定、人物功能、核心类型和情绪曲线。你只需要换世界观和人物社会身份，避免把迭代剧写成另一部结构松散的原创剧。'
-            : '四个维度先确定观众期待，再交给 Beat 编排展开。题材/世界观提供素材边界，类型、核心羁绊和情绪共同决定剧情的爽点方向。'
+            : contentTrack === '女频逆袭爽剧'
+              ? '女频逆袭爽剧的入口已经保留，但对应的 Beat、事件映射和人物功能库还在拆解中。当前页面用于确认产品配置方式，暂不生成故事。'
+              : '四个维度先确定观众期待，再交给 Beat 编排展开。题材/世界观提供素材边界，类型、核心羁绊和情绪共同决定剧情的爽点方向。'
         }
       />
+
+      {mode === '结构事件库组合' && contentTrack === '女频逆袭爽剧' && (
+        <div className="rounded-lg border border-[#ead2c2] bg-[#fff7f0] p-4 text-sm leading-6 text-[#66584b]">
+          当前赛道状态：<strong className="text-[#9d321d]">Beat 模板建设中</strong>。建议先完成“原生困境 / 逆袭触发 / 能力证明 / 公开打脸 / 身份跃迁”等主线的拆解，再开放事件推荐和剧本生成。
+        </div>
+      )}
 
       {mode === '爆款迭代' ? (
         <Panel title="模式 B：参考爆款的继承边界">
@@ -1065,9 +1168,10 @@ function BriefStep({
         </button>
         <button
           onClick={() => setStep(mode === '爆款迭代' ? 'result' : 'beats')}
-          className="flex items-center gap-2 rounded-md bg-[#cf4f35] px-4 py-2.5 text-sm font-semibold text-white"
+          disabled={mode === '结构事件库组合' && contentTrack === '女频逆袭爽剧'}
+          className="flex items-center gap-2 rounded-md bg-[#cf4f35] px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-45"
         >
-          {mode === '爆款迭代' ? '生成迭代故事方案' : '生成 5 Beat'}
+          {mode === '爆款迭代' ? '生成迭代故事方案' : contentTrack === '女频逆袭爽剧' ? '等待 Beat 模板' : '生成 5 Beat'}
           {mode === '爆款迭代' ? <ArrowRight size={16} /> : <Sparkles size={16} />}
         </button>
       </div>
@@ -1539,6 +1643,39 @@ function ChoiceCard({
         {icon}
       </div>
       <h3 className="text-lg font-semibold">{title}</h3>
+      <p className="mt-2 text-sm leading-6 text-[#6b5f52]">{desc}</p>
+    </button>
+  );
+}
+
+function TrackCard({
+  active,
+  title,
+  status,
+  desc,
+  onClick,
+}: {
+  active: boolean;
+  title: string;
+  status: string;
+  desc: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`rounded-lg border p-4 text-left transition ${
+        active
+          ? 'border-[#cf4f35] bg-[#fff0ea]'
+          : 'border-[#ded6c8] bg-white hover:border-[#bcae9a]'
+      }`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="font-semibold">{title}</h3>
+        <span className={`rounded-full px-2 py-1 text-xs ${status === '已配置' ? 'bg-[#eef4e9] text-[#4d7b4a]' : 'bg-[#f8f2e9] text-[#817363]'}`}>
+          {status}
+        </span>
+      </div>
       <p className="mt-2 text-sm leading-6 text-[#6b5f52]">{desc}</p>
     </button>
   );
