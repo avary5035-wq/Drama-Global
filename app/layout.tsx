@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'DramaScale Global',
+  title: 'Mango Drama Global',
   description: '海外短剧爆款剧本生成工作台原型',
 };
 

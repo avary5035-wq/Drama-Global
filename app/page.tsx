@@ -6,9 +6,12 @@ import {
   BadgeCheck,
   BookOpenText,
   Check,
+  ChevronDown,
   ChevronRight,
+  ChevronUp,
   CircleDollarSign,
   Clapperboard,
+  Copy,
   ClipboardList,
   Database,
   FileText,
@@ -18,6 +21,8 @@ import {
   RefreshCcw,
   Search,
   Sparkles,
+  Plus,
+  Trash2,
   Wand2,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -31,6 +36,77 @@ type BeatKey =
   | '宿命启动'
   | '生存危机'
   | '绑定关系';
+
+type BeatInstance = { id: string; key: BeatKey };
+
+const themeTags = [
+  '现代豪门',
+  '黑帮家族',
+  '皇室宫廷',
+  '狼人 / 吸血鬼',
+  '魔法奇幻',
+  '末日生存',
+  '西部小镇',
+  '小镇秘密',
+  '校园青春',
+  '职场精英',
+  '娱乐圈',
+  '医疗 / 律政',
+  '军旅 / 特工',
+  '体育竞技',
+  '历史时代剧',
+  '节日 / 度假地',
+  '家族继承',
+  '契约婚姻',
+  '秘密孩子',
+  '单亲育儿',
+  '重生 / 第二次机会',
+  '穿越 / 灵魂互换',
+  '身份掉马',
+  '复仇打脸',
+  '悬疑谜案',
+  '禁忌关系',
+  '豪门联姻',
+  '假身份潜伏',
+  '救赎与治愈',
+];
+
+const storyTypes = [
+  '先虐后爽',
+  '复仇打脸',
+  '强制爱 / 占有欲',
+  '甜宠治愈',
+  '追妻火葬场',
+  '宿命虐恋',
+  '禁忌拉扯',
+  '身份逆袭',
+  '悬疑救赎',
+  '成长独立',
+];
+
+const coreBonds = [
+  '契约婚姻',
+  '救命恩人',
+  '仇人共谋',
+  '宿命印记',
+  '真假身份',
+  '共同孩子 / 单亲育儿',
+  '继承与监护',
+  '秘密同盟',
+  '雇佣关系变真爱',
+  '旧爱重逢',
+];
+
+const emotionModes = [
+  '强爽感',
+  '先虐后爽',
+  '强制爱',
+  '甜宠高糖',
+  '高压悬疑',
+  '宿命虐感',
+  '暧昧拉扯',
+  '治愈成长',
+];
 
 declare global {
   interface Document {
@@ -110,6 +186,11 @@ const beatCards: {
     risk: '契约条件要具体，不能只写“为了保护”。',
   },
 ];
+
+const initialBeatSequence: BeatInstance[] = beatCards.map((beat, index) => ({
+  id: `beat-${index + 1}`,
+  key: beat.key,
+}));
 
 const eventPool: Record<BeatKey, string[]> = {
   原生困境: [
@@ -198,11 +279,18 @@ export default function Home() {
   const [step, setStep] = useState<StepId>('create');
   const [productionType, setProductionType] = useState<ProductionType>('AI 剧');
   const [mode, setMode] = useState<GenerationMode>('结构事件库组合');
-  const [selectedBeat, setSelectedBeat] = useState<BeatKey>('原生困境');
-  const [locked, setLocked] = useState<BeatKey[]>(['宿命启动']);
+  const [beatSequence, setBeatSequence] = useState<BeatInstance[]>(
+    initialBeatSequence,
+  );
+  const [selectedBeatId, setSelectedBeatId] = useState('beat-1');
+  const [locked, setLocked] = useState<string[]>(['beat-3']);
   const [tone, setTone] = useState('强爽感');
 
-  const currentBeat = beatCards.find((item) => item.key === selectedBeat)!;
+  const selectedInstance =
+    beatSequence.find((item) => item.id === selectedBeatId) ?? beatSequence[0];
+  const selectedBeat = selectedInstance?.key ?? '原生困境';
+  const currentBeat =
+    beatCards.find((item) => item.key === selectedBeat) ?? beatCards[0];
   const progress = useMemo(
     () =>
       steps.findIndex((item) => item.id === step) === -1
@@ -212,12 +300,55 @@ export default function Home() {
     [step],
   );
 
-  const toggleLock = (beat: BeatKey) => {
+  const toggleLock = (beatId: string) => {
     setLocked((items) =>
-      items.includes(beat)
-        ? items.filter((item) => item !== beat)
-        : [...items, beat],
+      items.includes(beatId)
+        ? items.filter((item) => item !== beatId)
+        : [...items, beatId],
     );
+  };
+
+  const moveBeat = (beatId: string, direction: -1 | 1) => {
+    setBeatSequence((items) => {
+      const index = items.findIndex((item) => item.id === beatId);
+      const nextIndex = index + direction;
+      if (index < 0 || nextIndex < 0 || nextIndex >= items.length) return items;
+      const next = [...items];
+      [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+      return next;
+    });
+  };
+
+  const duplicateBeat = (beatId: string) => {
+    setBeatSequence((items) => {
+      const index = items.findIndex((item) => item.id === beatId);
+      if (index < 0) return items;
+      const copy = { ...items[index], id: `beat-${Date.now()}` };
+      const next = [...items];
+      next.splice(index + 1, 0, copy);
+      setSelectedBeatId(copy.id);
+      return next;
+    });
+  };
+
+  const deleteBeat = (beatId: string) => {
+    setBeatSequence((items) => {
+      if (items.length <= 1) return items;
+      const index = items.findIndex((item) => item.id === beatId);
+      if (index < 0) return items;
+      const next = items.filter((item) => item.id !== beatId);
+      if (beatId === selectedBeatId) {
+        setSelectedBeatId(next[Math.min(index, next.length - 1)].id);
+      }
+      setLocked((locks) => locks.filter((id) => id !== beatId));
+      return next;
+    });
+  };
+
+  const addBeat = (key: BeatKey) => {
+    const item = { id: `beat-${Date.now()}`, key };
+    setBeatSequence((items) => [...items, item]);
+    setSelectedBeatId(item.id);
   };
 
   useEffect(() => {
@@ -236,7 +367,7 @@ export default function Home() {
             name: 'read_project_state',
             title: 'Read project state',
             description:
-              'Read the visible DramaScale prototype state, including step, production type, generation mode, selected beat, and locked beats.',
+              'Read the visible Mango Drama Global prototype state, including step, production type, generation mode, selected beat, editable beat sequence, and locked beats.',
             inputSchema: {
               type: 'object',
               properties: {},
@@ -249,6 +380,8 @@ export default function Home() {
                 productionType,
                 mode,
                 selectedBeat,
+                selectedBeatId,
+                beatSequence,
                 lockedBeats: locked,
               };
             },
@@ -291,11 +424,16 @@ export default function Home() {
                 mode?: GenerationMode;
                 step?: StepId;
                 selectedBeat?: BeatKey;
+                selectedBeatId?: string;
               };
               if (value.productionType) setProductionType(value.productionType);
               if (value.mode) setMode(value.mode);
               if (value.step) setStep(value.step);
-              if (value.selectedBeat) setSelectedBeat(value.selectedBeat);
+              if (value.selectedBeatId) setSelectedBeatId(value.selectedBeatId);
+              if (value.selectedBeat) {
+                const next = beatSequence.find((item) => item.key === value.selectedBeat);
+                if (next) setSelectedBeatId(next.id);
+              }
               return { status: 'updated', ...value };
             },
           },
@@ -307,7 +445,7 @@ export default function Home() {
     }
 
     return () => lifecycle.abort();
-  }, [locked, mode, productionType, selectedBeat, step]);
+  }, [beatSequence, locked, mode, productionType, selectedBeat, selectedBeatId, step]);
 
   return (
     <main className="min-h-screen bg-[#f6f4ef] text-[#201b16]">
@@ -318,7 +456,7 @@ export default function Home() {
               <Clapperboard size={21} />
             </div>
             <div>
-              <p className="text-sm font-semibold">DramaScale</p>
+              <p className="text-sm font-semibold">Mango Drama</p>
               <p className="text-xs text-[#b8ad9b]">剧本生产工作台</p>
             </div>
           </div>
@@ -425,8 +563,13 @@ export default function Home() {
             )}
             {step === 'beats' && (
               <BeatsStep
-                selectedBeat={selectedBeat}
-                setSelectedBeat={setSelectedBeat}
+                selectedBeatId={selectedBeatId}
+                setSelectedBeatId={setSelectedBeatId}
+                beatSequence={beatSequence}
+                moveBeat={moveBeat}
+                duplicateBeat={duplicateBeat}
+                deleteBeat={deleteBeat}
+                addBeat={addBeat}
                 currentBeat={currentBeat}
                 locked={locked}
                 toggleLock={toggleLock}
@@ -522,6 +665,15 @@ function BriefStep({
   setTone: (value: string) => void;
   setStep: (value: StepId) => void;
 }) {
+  const [selectedThemes, setSelectedThemes] = useState<string[]>([
+    '现代豪门',
+    '黑帮家族',
+    '契约婚姻',
+    '身份掉马',
+  ]);
+  const [storyType, setStoryType] = useState('先虐后爽');
+  const [coreBond, setCoreBond] = useState('契约婚姻');
+
   const costFields =
     productionType === 'AI 剧'
       ? ['角色一致性：高', '复杂动作：少量', '奇幻特效：允许局部', '重生成风险：中']
@@ -531,46 +683,107 @@ function BriefStep({
     <div className="grid gap-5">
       <SectionTitle
         eyebrow="Step 2"
-        title="把灵感配置成可生成的 Brief"
-        text="这里不要求用户一次想清楚所有剧情，系统可以补全 Want / Need / 枷锁，再进入 beat 编排。"
+        title={mode === '爆款迭代' ? '锁定爆款骨架，只替换可变设定' : '用四个维度配置 Brief'}
+        text={
+          mode === '爆款迭代'
+            ? '模式 B 会继承参考剧的关系设定、人物功能、核心类型和情绪曲线。你只需要换世界观和人物社会身份，避免把迭代剧写成另一部结构松散的原创剧。'
+            : '四个维度先确定观众期待，再交给 Beat 编排展开。题材/世界观提供素材边界，类型、核心羁绊和情绪共同决定剧情的爽点方向。'
+        }
       />
-      <div className="grid grid-cols-[1.15fr_0.85fr] gap-5 max-lg:grid-cols-1">
-        <Panel title="基础信息">
-          <Field label="一句话灵感" value="婚礼当天被背叛的新娘，被危险男人救下后卷入家族诅咒。" />
-          <div className="grid grid-cols-2 gap-3 max-md:grid-cols-1">
-            <Field label="目标市场" value="北美" />
-            <Field label="目标平台" value="ReelShort / DramaBox" />
-            <Field label="生产类型" value={productionType} />
-            <Field label="生成模式" value={mode} />
-            <Field label="总集数" value={mode === '爆款迭代' ? '继承参考爆款' : '60 集'} />
-            <Field label="免费集" value={mode === '爆款迭代' ? '继承参考爆款' : '第 8 集'} />
+
+      {mode === '爆款迭代' ? (
+        <Panel title="模式 B：参考爆款的继承边界">
+          <div className="mb-4 rounded-md border border-[#ead2c2] bg-[#fff7f0] p-3 text-sm leading-6 text-[#66584b]">
+            参考爆款：<strong className="text-[#3b3229]">The Bride Claimed by the Cursed Heir</strong> · 已抽取 5 Beat、人物功能、关系推进和情绪曲线。以下三项锁定，只允许改写世界观与人物社会身份。
+          </div>
+          <div className="grid gap-4">
+            <DimensionBlock
+              title="题材 / 世界观 · 可替换"
+              hint="选择新的世界规则和故事舞台，事件功能与节奏仍沿用参考剧。"
+              items={themeTags}
+              selected={selectedThemes}
+              onToggle={(item) =>
+                setSelectedThemes((items) =>
+                  items.includes(item)
+                    ? items.filter((value) => value !== item)
+                    : [...items, item],
+                )
+              }
+            />
+            <LockedDimension title="类型 · 继承参考爆款" value="先虐后爽 / 复仇打脸" />
+            <LockedDimension title="核心羁绊 · 继承参考爆款" value="契约婚姻 + 救命恩人" />
+            <LockedDimension title="关系设定 · 继承参考爆款" value="危险救援 → 契约绑定 → 共同对抗外部敌人" />
+            <LockedDimension title="人物功能设定 · 继承参考爆款" value="女主：被背叛后反击并掌握关键线索；男主：保护者、权力入口和情感压迫者" />
+            <LockedDimension title="情绪 · 继承参考爆款" value="强爽感 / 暧昧拉扯 / 宿命虐感" />
+            <div className="grid grid-cols-2 gap-3 max-md:grid-cols-1">
+              <EditableField label="女主社会身份替换" value="落魄王室的流亡公主" />
+              <EditableField label="男主社会身份替换" value="掌控边境贸易的冷面公爵" />
+            </div>
+            <div className="rounded-md border border-[#d8cdbc] bg-white p-3">
+              <p className="text-sm font-semibold">具体事件 · 只换表达，不换功能</p>
+              <p className="mt-1 text-xs leading-5 text-[#817363]">例如把“婚礼背叛”换成“王室加冕礼上的继承权陷阱”，但仍然承担“原生困境：公开羞辱 + 女主必须改变”的结构功能。</p>
+              <div className="mt-3 grid gap-2 text-sm">
+                {['原生困境：婚礼骗局 → 加冕礼继承权陷阱', '宿命羁绊：试衣间救援 → 雪夜边境救援', '生存危机：被逼签协议 → 被迫交出王室印章'].map((item) => (
+                  <div key={item} className="rounded bg-[#f8f2e9] px-3 py-2 text-[#5d5147]">{item}</div>
+                ))}
+              </div>
+            </div>
           </div>
         </Panel>
-        <Panel title="题材与情绪">
-          <div className="flex flex-wrap gap-2">
-            {['黑帮', '契约婚姻', '背叛', '复仇', '宿命诅咒', '身份反转'].map(
-              (item) => (
-                <Tag key={item}>{item}</Tag>
-              ),
-            )}
-          </div>
-          <div className="mt-4 grid grid-cols-3 gap-2">
-            {['强爽感', '先虐后爽', '强制爱'].map((item) => (
-              <button
-                key={item}
-                onClick={() => setTone(item)}
-                className={`rounded-md border px-3 py-2 text-sm ${
-                  tone === item
-                    ? 'border-[#cf4f35] bg-[#fff0ea] text-[#9d321d]'
-                    : 'border-[#d8cdbc] bg-white text-[#64584c]'
-                }`}
-              >
-                {item}
-              </button>
-            ))}
+      ) : (
+        <Panel title="四个核心维度">
+          <div className="grid gap-5">
+            <DimensionBlock
+              title="1. 题材 / 世界观"
+              hint="可多选。先选故事发生在哪里、受什么规则约束。"
+              items={themeTags}
+              selected={selectedThemes}
+              onToggle={(item) =>
+                setSelectedThemes((items) =>
+                  items.includes(item)
+                    ? items.filter((value) => value !== item)
+                    : [...items, item],
+                )
+              }
+            />
+            <DimensionBlock
+              title="2. 类型"
+              hint="确定观众期待的核心情感模式，建议先选一个主类型。"
+              items={storyTypes}
+              selected={[storyType]}
+              onToggle={setStoryType}
+              single
+            />
+            <DimensionBlock
+              title="3. 核心羁绊"
+              hint="回答男女主为什么会产生连接，以及为什么不能轻易分开。"
+              items={coreBonds}
+              selected={[coreBond]}
+              onToggle={setCoreBond}
+              single
+            />
+            <DimensionBlock
+              title="4. 情绪"
+              hint="确定每集的观看感受和付费驱动力。"
+              items={emotionModes}
+              selected={[tone]}
+              onToggle={setTone}
+              single
+            />
           </div>
         </Panel>
-      </div>
+      )}
+
+      <Panel title="项目参数">
+        <div className="grid grid-cols-3 gap-3 max-md:grid-cols-1">
+          <Field label="目标市场" value="北美 / 英语区" />
+          <Field label="目标平台" value="ReelShort / DramaBox" />
+          <Field label="生产类型" value={productionType} />
+          <Field label="总集数" value={mode === '爆款迭代' ? '继承参考爆款' : '60 集（可选 40-80）'} />
+          <Field label="免费集" value={mode === '爆款迭代' ? '继承参考爆款' : '第 8 集（可选 6-10）'} />
+          <Field label="单集长度" value={mode === '爆款迭代' ? '继承参考爆款' : '默认 1000 字以内'} />
+        </div>
+      </Panel>
 
       <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
         <Panel title="人物小传">
@@ -617,35 +830,53 @@ function BriefStep({
 }
 
 function BeatsStep({
-  selectedBeat,
-  setSelectedBeat,
+  selectedBeatId,
+  setSelectedBeatId,
+  beatSequence,
+  moveBeat,
+  duplicateBeat,
+  deleteBeat,
+  addBeat,
   currentBeat,
   locked,
   toggleLock,
   setStep,
 }: {
-  selectedBeat: BeatKey;
-  setSelectedBeat: (value: BeatKey) => void;
+  selectedBeatId: string;
+  setSelectedBeatId: (value: string) => void;
+  beatSequence: BeatInstance[];
+  moveBeat: (beatId: string, direction: -1 | 1) => void;
+  duplicateBeat: (beatId: string) => void;
+  deleteBeat: (beatId: string) => void;
+  addBeat: (key: BeatKey) => void;
   currentBeat: (typeof beatCards)[number];
-  locked: BeatKey[];
-  toggleLock: (value: BeatKey) => void;
+  locked: string[];
+  toggleLock: (value: string) => void;
   setStep: (value: StepId) => void;
 }) {
+  const currentInstance = beatSequence.find((item) => item.id === selectedBeatId);
+  const selectedBeat = currentInstance?.key ?? '原生困境';
+
   return (
     <div className="grid gap-5">
       <SectionTitle
         eyebrow="Step 3"
-        title="5 Beat 编排与事件替换"
-        text="每个 beat 都先给一个主事件，同时首屏推荐 5-8 个可替换事件。编剧可以锁定满意事件，局部重生成其他部分。"
+        title="Beat 编排与事件替换"
+        text="5 个 Beat 是可编辑的结构积木：可以调整先后、重复出现或删除。每个实例再选择一个主事件，编剧可以锁定满意事件，局部重生成其他部分。"
       />
       <div className="grid grid-cols-[1fr_360px] gap-5 max-xl:grid-cols-1">
         <div className="grid gap-3">
-          {beatCards.map((beat, index) => (
+          {beatSequence.map((instance, index) => {
+            const beat = beatCards.find((item) => item.key === instance.key)!;
+            const sameBeatCount = beatSequence
+              .slice(0, index + 1)
+              .filter((item) => item.key === instance.key).length;
+            return (
             <button
-              key={beat.key}
-              onClick={() => setSelectedBeat(beat.key)}
+              key={instance.id}
+              onClick={() => setSelectedBeatId(instance.id)}
               className={`rounded-lg border p-4 text-left shadow-sm ${
-                selectedBeat === beat.key
+                selectedBeatId === instance.id
                   ? 'border-[#cf4f35] bg-white'
                   : 'border-[#ded6c8] bg-[#fffcf6]'
               }`}
@@ -653,11 +884,11 @@ function BeatsStep({
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold text-[#9d321d]">
-                    Beat {index + 1}
+                    Beat {index + 1}{sameBeatCount > 1 ? ` · 第 ${sameBeatCount} 次出现` : ''}
                   </p>
                   <h3 className="mt-1 text-lg font-semibold">{beat.key}</h3>
                 </div>
-                {locked.includes(beat.key) && (
+                {locked.includes(instance.id) && (
                   <span className="flex items-center gap-1 rounded-full bg-[#eef4e9] px-2 py-1 text-xs text-[#4d7b4a]">
                     <Lock size={12} />
                     已锁定
@@ -669,8 +900,82 @@ function BeatsStep({
               <p className="mt-2 text-sm leading-6 text-[#5d5147]">
                 {beat.functionText}
               </p>
+              <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                <span className="rounded bg-[#f8f2e9] px-2 py-1 text-xs text-[#817363]">{beat.emotion}</span>
+                <span className="ml-auto flex items-center gap-1">
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label="上移 Beat"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      moveBeat(instance.id, -1);
+                    }}
+                    className="rounded border border-[#d8cdbc] bg-white p-1.5 hover:bg-[#f8f2e9]"
+                  >
+                    <ChevronUp size={14} />
+                  </span>
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label="下移 Beat"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      moveBeat(instance.id, 1);
+                    }}
+                    className="rounded border border-[#d8cdbc] bg-white p-1.5 hover:bg-[#f8f2e9]"
+                  >
+                    <ChevronDown size={14} />
+                  </span>
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label="重复 Beat"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      duplicateBeat(instance.id);
+                    }}
+                    className="rounded border border-[#d8cdbc] bg-white p-1.5 hover:bg-[#f8f2e9]"
+                  >
+                    <Copy size={14} />
+                  </span>
+                  <span
+                    role="button"
+                    tabIndex={0}
+                    aria-label="删除 Beat"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      deleteBeat(instance.id);
+                    }}
+                    className="rounded border border-[#ead2c2] bg-white p-1.5 text-[#9d321d] hover:bg-[#fff0ea]"
+                  >
+                    <Trash2 size={14} />
+                  </span>
+                </span>
+              </div>
             </button>
-          ))}
+            );
+          })}
+          <div className="flex items-center gap-2 rounded-lg border border-dashed border-[#c9bba8] bg-[#fffcf6] p-3">
+            <Plus size={16} className="text-[#9d321d]" />
+            <select
+              defaultValue=""
+              aria-label="添加一个 Beat"
+              onChange={(event) => {
+                if (event.target.value) addBeat(event.target.value as BeatKey);
+                event.currentTarget.value = '';
+              }}
+              className="flex-1 rounded-md border border-[#d8cdbc] bg-white px-3 py-2 text-sm"
+            >
+              <option value="">添加 Beat（可重复）</option>
+              {beatCards.map((beat) => (
+                <option key={beat.key} value={beat.key}>
+                  {beat.key}
+                </option>
+              ))}
+            </select>
+            <span className="text-xs text-[#817363]">当前 {beatSequence.length} 个</span>
+          </div>
         </div>
         <Panel title={`${currentBeat.key}：候选事件池`}>
           <p className="mb-3 text-sm text-[#6b5f52]">{currentBeat.risk}</p>
@@ -678,6 +983,7 @@ function BeatsStep({
             {eventPool[selectedBeat].map((event, index) => (
               <button
                 key={event}
+                onClick={() => toggleLock(selectedBeatId)}
                 className={`flex items-center justify-between rounded-md border px-3 py-2.5 text-left text-sm ${
                   index === 0
                     ? 'border-[#cf4f35] bg-[#fff0ea]'
@@ -693,10 +999,10 @@ function BeatsStep({
           </div>
           <div className="mt-4 flex gap-2">
             <button
-              onClick={() => toggleLock(selectedBeat)}
+              onClick={() => toggleLock(selectedBeatId)}
               className="flex-1 rounded-md border border-[#c9bba8] bg-white px-3 py-2 text-sm font-medium"
             >
-              {locked.includes(selectedBeat) ? '取消锁定' : '锁定事件'}
+              {locked.includes(selectedBeatId) ? '取消锁定' : '锁定事件'}
             </button>
             <button className="flex-1 rounded-md bg-[#201b16] px-3 py-2 text-sm font-semibold text-white">
               重新推荐
@@ -978,6 +1284,79 @@ function Field({ label, value }: { label: string; value: string }) {
         {value}
       </span>
     </label>
+  );
+}
+
+function EditableField({ label, value }: { label: string; value: string }) {
+  return (
+    <label className="block">
+      <span className="text-xs font-medium text-[#817363]">{label}</span>
+      <input
+        defaultValue={value}
+        className="mt-1 block w-full rounded-md border border-[#d8cdbc] bg-[#fffdf9] px-3 py-2 text-sm outline-none focus:border-[#cf4f35]"
+      />
+    </label>
+  );
+}
+
+function DimensionBlock({
+  title,
+  hint,
+  items,
+  selected,
+  onToggle,
+  single = false,
+}: {
+  title: string;
+  hint: string;
+  items: string[];
+  selected: string[];
+  onToggle: (item: string) => void;
+  single?: boolean;
+}) {
+  return (
+    <div>
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <p className="text-sm font-semibold">{title}</p>
+        <p className="text-xs text-[#817363]">{hint}</p>
+      </div>
+      <div className="mt-2 flex max-h-36 flex-wrap gap-2 overflow-y-auto rounded-md bg-[#f8f2e9] p-3">
+        {items.map((item) => {
+          const active = selected.includes(item);
+          return (
+            <button
+              key={item}
+              type="button"
+              onClick={() => onToggle(item)}
+              className={`rounded-full border px-3 py-1.5 text-sm transition ${
+                active
+                  ? 'border-[#cf4f35] bg-[#fff0ea] text-[#9d321d]'
+                  : 'border-[#d8cdbc] bg-white text-[#64584c] hover:border-[#bcae9a]'
+              }`}
+            >
+              {active ? '✓ ' : ''}
+              {item}
+            </button>
+          );
+        })}
+      </div>
+      {single && <p className="mt-1 text-xs text-[#9d321d]">当前选择：{selected.join('、')}</p>}
+    </div>
+  );
+}
+
+function LockedDimension({ title, value }: { title: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-md border border-[#ded6c8] bg-[#f8f2e9] px-3 py-3">
+      <div>
+        <p className="text-sm font-semibold">{title}</p>
+        <p className="mt-1 text-sm text-[#5d5147]">{value}</p>
+      </div>
+      <span className="flex shrink-0 items-center gap-1 rounded-full bg-[#201b16] px-2.5 py-1 text-xs text-white">
+        <Lock size={12} />
+        已锁定
+      </span>
+    </div>
   );
 }
 
