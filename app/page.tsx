@@ -108,6 +108,60 @@ const emotionModes = [
   '治愈成长',
 ];
 
+type HitShow = {
+  id: string;
+  title: string;
+  platform: string;
+  updated: string;
+  episodes: string;
+  tags: string[];
+  score: string;
+  hook: string;
+};
+
+const hitShows: HitShow[] = [
+  {
+    id: 'hit-1',
+    title: 'The Bride Claimed by the Cursed Heir',
+    platform: 'ReelShort',
+    updated: '今日更新',
+    episodes: '60 集 · 免费第 8 集',
+    tags: ['婚礼背叛', '契约婚姻', '家族诅咒'],
+    score: '92',
+    hook: '婚礼背叛 → 危险救援 → 契约绑定',
+  },
+  {
+    id: 'hit-2',
+    title: 'My Alpha’s Rejected Mate',
+    platform: 'DramaBox',
+    updated: '昨日更新',
+    episodes: '72 集 · 免费第 10 集',
+    tags: ['狼人王族', '拒绝婚约', '身份掉马'],
+    score: '89',
+    hook: '公开拒绝 → 生存危机 → Alpha 反悔追妻',
+  },
+  {
+    id: 'hit-3',
+    title: 'The Billionaire’s Secret Baby',
+    platform: 'ShortMax',
+    updated: '3 天前',
+    episodes: '48 集 · 免费第 7 集',
+    tags: ['豪门', '秘密孩子', '旧爱重逢'],
+    score: '86',
+    hook: '五年后重逢 → 孩子身份暴露 → 共同监护',
+  },
+  {
+    id: 'hit-4',
+    title: 'Married to My Enemy King',
+    platform: 'NetShort',
+    updated: '本周热门',
+    episodes: '80 集 · 免费第 9 集',
+    tags: ['王室权谋', '仇人共谋', '强制爱'],
+    score: '84',
+    hook: '家国仇恨 → 敌国联姻 → 王位反转',
+  },
+];
+
 declare global {
   interface Document {
     modelContext?: {
@@ -279,6 +333,8 @@ export default function Home() {
   const [step, setStep] = useState<StepId>('create');
   const [productionType, setProductionType] = useState<ProductionType>('AI 剧');
   const [mode, setMode] = useState<GenerationMode>('结构事件库组合');
+  const [selectedHitId, setSelectedHitId] = useState<string | null>(null);
+  const [customHit, setCustomHit] = useState<HitShow | null>(null);
   const [beatSequence, setBeatSequence] = useState<BeatInstance[]>(
     initialBeatSequence,
   );
@@ -291,14 +347,14 @@ export default function Home() {
   const selectedBeat = selectedInstance?.key ?? '原生困境';
   const currentBeat =
     beatCards.find((item) => item.key === selectedBeat) ?? beatCards[0];
-  const progress = useMemo(
-    () =>
-      steps.findIndex((item) => item.id === step) === -1
-        ? 0
-        : ((steps.findIndex((item) => item.id === step) + 1) / steps.length) *
-          100,
-    [step],
+  const visibleSteps = useMemo(
+    () => (mode === '爆款迭代' ? steps.filter((item) => item.id !== 'beats') : steps),
+    [mode],
   );
+  const progress = useMemo(() => {
+    const index = visibleSteps.findIndex((item) => item.id === step);
+    return index === -1 ? 0 : ((index + 1) / visibleSteps.length) * 100;
+  }, [step, visibleSteps]);
 
   const toggleLock = (beatId: string) => {
     setLocked((items) =>
@@ -379,6 +435,11 @@ export default function Home() {
                 step,
                 productionType,
                 mode,
+                selectedHitId,
+                selectedHit:
+                  (selectedHitId === 'custom-hit'
+                    ? customHit
+                    : hitShows.find((item) => item.id === selectedHitId)) ?? null,
                 selectedBeat,
                 selectedBeatId,
                 beatSequence,
@@ -402,6 +463,7 @@ export default function Home() {
               properties: {
                 productionType: { enum: ['AI 剧', '真人剧'] },
                 mode: { enum: ['结构事件库组合', '爆款迭代'] },
+                selectedHitId: { type: 'string' },
                 step: {
                   enum: ['create', 'brief', 'beats', 'result', 'script'],
                 },
@@ -422,12 +484,14 @@ export default function Home() {
               const value = input as {
                 productionType?: ProductionType;
                 mode?: GenerationMode;
+                selectedHitId?: string | null;
                 step?: StepId;
                 selectedBeat?: BeatKey;
                 selectedBeatId?: string;
               };
               if (value.productionType) setProductionType(value.productionType);
               if (value.mode) setMode(value.mode);
+              if (value.selectedHitId !== undefined) setSelectedHitId(value.selectedHitId);
               if (value.step) setStep(value.step);
               if (value.selectedBeatId) setSelectedBeatId(value.selectedBeatId);
               if (value.selectedBeat) {
@@ -445,7 +509,7 @@ export default function Home() {
     }
 
     return () => lifecycle.abort();
-  }, [beatSequence, locked, mode, productionType, selectedBeat, selectedBeatId, step]);
+  }, [beatSequence, customHit, locked, mode, productionType, selectedBeat, selectedBeatId, selectedHitId, step]);
 
   return (
     <main className="min-h-screen bg-[#f6f4ef] text-[#201b16]">
@@ -525,7 +589,7 @@ export default function Home() {
               />
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
-              {steps.map(({ id, label, icon: Icon }) => (
+              {visibleSteps.map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
                   onClick={() => setStep(id)}
@@ -549,6 +613,10 @@ export default function Home() {
                 setProductionType={setProductionType}
                 mode={mode}
                 setMode={setMode}
+                selectedHitId={selectedHitId}
+                setSelectedHitId={setSelectedHitId}
+                customHit={customHit}
+                setCustomHit={setCustomHit}
                 setStep={setStep}
               />
             )}
@@ -556,6 +624,7 @@ export default function Home() {
               <BriefStep
                 productionType={productionType}
                 mode={mode}
+                selectedHit={selectedHitId === 'custom-hit' ? customHit : hitShows.find((item) => item.id === selectedHitId) ?? null}
                 tone={tone}
                 setTone={setTone}
                 setStep={setStep}
@@ -576,7 +645,13 @@ export default function Home() {
                 setStep={setStep}
               />
             )}
-            {step === 'result' && <ResultStep setStep={setStep} />}
+            {step === 'result' && (
+              <ResultStep
+                setStep={setStep}
+                mode={mode}
+                selectedHit={selectedHitId === 'custom-hit' ? customHit : hitShows.find((item) => item.id === selectedHitId) ?? null}
+              />
+            )}
             {step === 'script' && <ScriptStep />}
           </div>
         </section>
@@ -592,14 +667,51 @@ function CreateStep({
   setProductionType,
   mode,
   setMode,
+  selectedHitId,
+  setSelectedHitId,
+  customHit,
+  setCustomHit,
   setStep,
 }: {
   productionType: ProductionType;
   setProductionType: (value: ProductionType) => void;
   mode: GenerationMode;
   setMode: (value: GenerationMode) => void;
+  selectedHitId: string | null;
+  setSelectedHitId: (value: string) => void;
+  customHit: HitShow | null;
+  setCustomHit: (value: HitShow | null) => void;
   setStep: (value: StepId) => void;
 }) {
+  const [referenceSource, setReferenceSource] = useState<'library' | 'upload'>('library');
+  const [uploadKind, setUploadKind] = useState<'text' | 'video' | 'link'>('text');
+  const [uploadText, setUploadText] = useState('');
+  const [uploadLink, setUploadLink] = useState('');
+  const [fileName, setFileName] = useState('');
+  const [parseStatus, setParseStatus] = useState('');
+
+  const parseUploadedReference = () => {
+    const hasInput = uploadKind === 'link' ? uploadLink.trim() : uploadKind === 'text' ? uploadText.trim() || fileName : fileName;
+    if (!hasInput) {
+      setParseStatus('请先粘贴文本、选择文件或填写播放链接');
+      return;
+    }
+    const parsed: HitShow = {
+      id: 'custom-hit',
+      title: uploadKind === 'link' ? '来自播放链接的待解析爆款' : fileName || '用户上传的爆款剧',
+      platform: uploadKind === 'video' ? '视频解析' : uploadKind === 'link' ? '链接解析' : '文本解析',
+      updated: '刚刚加入',
+      episodes: '解析后识别集数 · 卡点待确认',
+      tags: ['待解析', '用户上传', '可生成迭代模板'],
+      score: '待评估',
+      hook: '系统将提取 5 Beat、关系设定、人物功能、情绪曲线和付费卡点',
+    };
+    setCustomHit(parsed);
+    setSelectedHitId('custom-hit');
+    setParseStatus('已加入当前项目，进入 Brief 后会继承解析结果');
+    setReferenceSource('library');
+  };
+
   return (
     <div className="grid gap-5">
       <SectionTitle
@@ -639,12 +751,144 @@ function CreateStep({
           onClick={() => setMode('爆款迭代')}
         />
       </div>
+      {mode === '爆款迭代' && (
+        <Panel title="先选择要迭代的爆款剧">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <p className="text-sm text-[#6b5f52]">
+              系统会从历史爆款和每日更新的拆解队列中加载参考剧，选中后自动继承它的节奏、关系和付费结构。
+            </p>
+            <span className="shrink-0 rounded-full bg-[#eef4e9] px-2.5 py-1 text-xs text-[#4d7b4a]">每日更新</span>
+          </div>
+          <div className="mb-4 flex gap-2 border-b border-[#eadfce] pb-2">
+            {[
+              ['library', '系统爆款案例库'],
+              ['upload', '上传今天的新爆款'],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                onClick={() => setReferenceSource(value as 'library' | 'upload')}
+                className={`rounded-md px-3 py-2 text-sm font-medium ${
+                  referenceSource === value ? 'bg-[#201b16] text-white' : 'bg-[#f8f2e9] text-[#64584c]'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          {referenceSource === 'upload' && (
+            <div className="mb-4 rounded-lg border border-[#d8cdbc] bg-[#fffcf6] p-4">
+              <div className="mb-3 grid grid-cols-3 gap-2 max-md:grid-cols-1">
+                {[
+                  ['text', '剧本文本 / 文档'],
+                  ['video', '视频文件'],
+                  ['link', '播放链接'],
+                ].map(([value, label]) => (
+                  <button
+                    key={value}
+                    onClick={() => setUploadKind(value as 'text' | 'video' | 'link')}
+                    className={`rounded-md border px-3 py-2 text-sm ${
+                      uploadKind === value ? 'border-[#cf4f35] bg-[#fff0ea] text-[#9d321d]' : 'border-[#d8cdbc] bg-white text-[#64584c]'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {uploadKind === 'text' && (
+                <div className="grid gap-2">
+                  <textarea
+                    value={uploadText}
+                    onChange={(event) => setUploadText(event.target.value)}
+                    placeholder="粘贴剧本文本、分集大纲，或上传 .txt / .docx / .pdf"
+                    className="min-h-24 rounded-md border border-[#d8cdbc] bg-white px-3 py-2 text-sm outline-none focus:border-[#cf4f35]"
+                  />
+                  <input
+                    type="file"
+                    accept=".txt,.doc,.docx,.pdf"
+                    onChange={(event) => setFileName(event.target.files?.[0]?.name ?? '')}
+                    className="text-sm text-[#6b5f52]"
+                  />
+                </div>
+              )}
+              {uploadKind === 'video' && (
+                <div className="grid gap-2">
+                  <input
+                    type="file"
+                    accept="video/*"
+                    onChange={(event) => setFileName(event.target.files?.[0]?.name ?? '')}
+                    className="rounded-md border border-[#d8cdbc] bg-white px-3 py-2 text-sm"
+                  />
+                  <p className="text-xs leading-5 text-[#817363]">系统会从视频中提取对白、场景、人物关系和分集节奏，再生成可编辑的结构摘要。</p>
+                </div>
+              )}
+              {uploadKind === 'link' && (
+                <input
+                  value={uploadLink}
+                  onChange={(event) => setUploadLink(event.target.value)}
+                  placeholder="粘贴视频播放链接或平台剧集链接"
+                  className="w-full rounded-md border border-[#d8cdbc] bg-white px-3 py-2 text-sm outline-none focus:border-[#cf4f35]"
+                />
+              )}
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <button
+                  onClick={parseUploadedReference}
+                  className="rounded-md bg-[#cf4f35] px-3 py-2 text-sm font-semibold text-white"
+                >
+                  解析并加入迭代
+                </button>
+                {fileName && <span className="text-xs text-[#6b5f52]">已选择：{fileName}</span>}
+                {parseStatus && <span className="text-xs text-[#4d7b4a]">{parseStatus}</span>}
+              </div>
+            </div>
+          )}
+          {customHit && referenceSource === 'library' && (
+            <button
+              onClick={() => setSelectedHitId('custom-hit')}
+              className={`mb-3 w-full rounded-lg border p-3 text-left ${selectedHitId === 'custom-hit' ? 'border-[#cf4f35] bg-[#fff0ea]' : 'border-[#ded6c8] bg-white'}`}
+            >
+              <p className="text-xs font-semibold text-[#9d321d]">刚刚上传 · {customHit.platform}</p>
+              <p className="mt-1 font-semibold">{customHit.title}</p>
+              <p className="mt-1 text-xs text-[#6b5f52]">点击继续使用这部待解析爆款</p>
+            </button>
+          )}
+          <div className="grid grid-cols-2 gap-3 max-lg:grid-cols-1">
+            {hitShows.map((hit) => (
+              <button
+                key={hit.id}
+                onClick={() => setSelectedHitId(hit.id)}
+                className={`rounded-lg border p-4 text-left transition ${
+                  selectedHitId === hit.id
+                    ? 'border-[#cf4f35] bg-[#fff0ea]'
+                    : 'border-[#ded6c8] bg-[#fffcf6] hover:border-[#bcae9a]'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold text-[#9d321d]">{hit.platform} · {hit.updated}</p>
+                    <h3 className="mt-1 font-semibold">{hit.title}</h3>
+                  </div>
+                  <span className="rounded-full bg-[#201b16] px-2 py-1 text-xs text-white">{hit.score} 分</span>
+                </div>
+                <p className="mt-2 text-sm text-[#5d5147]">{hit.hook}</p>
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {hit.tags.map((tag) => <Tag key={tag}>{tag}</Tag>)}
+                </div>
+                <p className="mt-3 text-xs text-[#817363]">{hit.episodes}</p>
+              </button>
+            ))}
+          </div>
+          <div className="mt-3 rounded-md border border-[#d8cdbc] bg-white px-3 py-2 text-xs text-[#6b5f52]">
+            已拆解数据包含：5 Beat 对应关系、人物功能、情绪峰值、免费卡点、付费点密度和单集节奏分布。
+          </div>
+        </Panel>
+      )}
       <div className="flex justify-end">
         <button
           onClick={() => setStep('brief')}
-          className="flex items-center gap-2 rounded-md bg-[#cf4f35] px-4 py-2.5 text-sm font-semibold text-white"
+          disabled={mode === '爆款迭代' && !selectedHitId}
+          className="flex items-center gap-2 rounded-md bg-[#cf4f35] px-4 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-45"
         >
-          进入 Brief
+          {mode === '爆款迭代' && !selectedHitId ? '先选择参考爆款' : '进入 Brief'}
           <ChevronRight size={16} />
         </button>
       </div>
@@ -655,12 +899,14 @@ function CreateStep({
 function BriefStep({
   productionType,
   mode,
+  selectedHit,
   tone,
   setTone,
   setStep,
 }: {
   productionType: ProductionType;
   mode: GenerationMode;
+  selectedHit: HitShow | null;
   tone: string;
   setTone: (value: string) => void;
   setStep: (value: StepId) => void;
@@ -694,7 +940,7 @@ function BriefStep({
       {mode === '爆款迭代' ? (
         <Panel title="模式 B：参考爆款的继承边界">
           <div className="mb-4 rounded-md border border-[#ead2c2] bg-[#fff7f0] p-3 text-sm leading-6 text-[#66584b]">
-            参考爆款：<strong className="text-[#3b3229]">The Bride Claimed by the Cursed Heir</strong> · 已抽取 5 Beat、人物功能、关系推进和情绪曲线。以下三项锁定，只允许改写世界观与人物社会身份。
+            参考爆款：<strong className="text-[#3b3229]">{selectedHit?.title ?? '未选择'}</strong> · {selectedHit?.platform ?? '案例库'} · 已抽取 5 Beat、人物功能、关系推进和情绪曲线。以下继承项锁定，只允许改写世界观、人物社会身份和具体事件表达。
           </div>
           <div className="grid gap-4">
             <DimensionBlock
@@ -818,11 +1064,11 @@ function BriefStep({
           返回
         </button>
         <button
-          onClick={() => setStep('beats')}
+          onClick={() => setStep(mode === '爆款迭代' ? 'result' : 'beats')}
           className="flex items-center gap-2 rounded-md bg-[#cf4f35] px-4 py-2.5 text-sm font-semibold text-white"
         >
-          生成 5 Beat
-          <Sparkles size={16} />
+          {mode === '爆款迭代' ? '生成迭代故事方案' : '生成 5 Beat'}
+          {mode === '爆款迭代' ? <ArrowRight size={16} /> : <Sparkles size={16} />}
         </button>
       </div>
     </div>
@@ -1023,14 +1269,30 @@ function BeatsStep({
   );
 }
 
-function ResultStep({ setStep }: { setStep: (value: StepId) => void }) {
+function ResultStep({
+  setStep,
+  mode,
+  selectedHit,
+}: {
+  setStep: (value: StepId) => void;
+  mode: GenerationMode;
+  selectedHit: HitShow | null;
+}) {
   return (
     <div className="grid gap-5">
       <SectionTitle
         eyebrow="Step 4"
-        title="故事方案与免费卡点"
-        text="这里给策划判断项目是否值得继续写。重点看故事钩子、人物关系、免费卡点和付费驱动力。"
+        title={mode === '爆款迭代' ? '迭代故事方案与免费卡点' : '故事方案与免费卡点'}
+        text={mode === '爆款迭代' ? '已跳过 5 Beat 编排，直接沿用参考爆款的结构功能和节奏模板。这里重点检查替换后的世界观、人物身份、事件表达和相似度风险。' : '这里给策划判断项目是否值得继续写。重点看故事钩子、人物关系、免费卡点和付费驱动力。'}
       />
+      {mode === '爆款迭代' && selectedHit && (
+        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-[#ead2c2] bg-[#fff7f0] px-4 py-3 text-sm">
+          <span className="font-semibold text-[#9d321d]">参考爆款</span>
+          <span>{selectedHit.title}</span>
+          <span className="text-[#817363]">{selectedHit.platform} · {selectedHit.episodes}</span>
+          <span className="ml-auto rounded-full bg-[#201b16] px-2.5 py-1 text-xs text-white">已继承节奏模板</span>
+        </div>
+      )}
       <div className="grid grid-cols-[1fr_320px] gap-5 max-xl:grid-cols-1">
         <Panel title="方案 A：The Bride Claimed by the Cursed Heir">
           <div className="space-y-4">
@@ -1178,7 +1440,13 @@ function RightPanel({
           <div className="space-y-3 text-sm leading-6">
             <Risk
               title="Beat 配置"
-              text={step === 'beats' ? '生存危机很强，但宿命启动需要前置线索，避免第 3 集突兀。' : '当前结构完整，建议继续检查免费集卡点。'}
+              text={
+                mode === '爆款迭代'
+                  ? '当前沿用参考爆款的 Beat 顺序和叙事功能，重点检查替换事件是否仍承担原功能。'
+                  : step === 'beats'
+                    ? '生存危机很强，但宿命启动需要前置线索，避免第 3 集突兀。'
+                    : '当前结构完整，建议继续检查免费集卡点。'
+              }
             />
             <Risk
               title="相似度"
