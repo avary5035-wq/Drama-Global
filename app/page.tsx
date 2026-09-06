@@ -368,15 +368,53 @@ const episodes = [
   },
 ];
 
-const freeEpisode = {
-  ep: '第 8 集',
-  title: '免费卡点：纹章亮起',
-  words: 744,
-  duration: '2 分 40 秒',
-  hook: '女主签下婚姻协议前，母亲留下的纹章突然亮起。',
-  script:
-    'INT. 庄园书房 - 夜\nNatalie 的笔尖停在婚姻协议最后一页。Alessio 站在她身后，没有催促。\nNATALIE：签下它，我会失去什么？\nALESSIO：你现在还没有资格问这个问题。\n她低头看向母亲留下的项链。蓝宝石忽然裂开，一道古老纹章映在协议上。\n墙后的暗门应声打开，里面挂着一幅母亲年轻时的画像。画像里的女人，正戴着 Moretti 家族的戒指。\nNatalie 抬头，脸色发白。\nNATALIE：你早就知道我母亲来过这里？\nAlessio 的沉默比回答更危险。门外传来继妹的声音。\nELLE：姐姐，签完字，你就会知道自己到底是谁。',
-};
+const freeArcEpisodes = [
+  {
+    ep: '第 4 集',
+    title: '住进危险庄园',
+    words: 884,
+    duration: '2 分 31 秒',
+    hook: '女主发现庄园所有佣人都像早就认识她。',
+    script:
+      'INT. MORETTI 庄园大厅 - 夜\nNatalie 跟着 Alessio 踏进庄园。壁炉火光映在墙上的家族画像上，每一双眼睛都像在盯着她。\n老管家弯腰行礼。\n管家：欢迎回来，小姐。\nNatalie 停住。\nNATALIE：回来？我从没来过这里。\nAlessio 的手指在戒面上轻轻一扣，管家立刻低头。\nALESSIO：他认错人了。\nNatalie 看向楼梯尽头。一扇门半开着，里面传来女人低低的哼唱声，旋律和母亲生前唱给她的摇篮曲一模一样。\n她不顾 Alessio 阻拦冲上楼，推开门。房间里没有人，只有一件保存完好的白色礼服。\n衣领内侧绣着母亲的名字。\nNatalie 抬头，镜子里却映出一个和她长得几乎一样的女人。',
+  },
+  {
+    ep: '第 5 集',
+    title: '未婚夫反咬一口',
+    words: 907,
+    duration: '2 分 38 秒',
+    hook: '反派把女主包装成骗婚犯，逼她公开道歉。',
+    script:
+      'INT. 庄园餐厅 - 日\nNatalie 刚坐下，手机开始疯狂震动。新闻推送铺满屏幕：落跑新娘勾结黑帮，骗取未婚夫家产。\nJulian 在直播里红着眼。\nJULIAN：我爱她，所以愿意给她最后一次机会。只要她回来道歉，我可以不追究。\nElle 坐在他身边抹眼泪。\nELLE：姐姐，不要再被那个男人利用了。\nNatalie 气得手指发抖。\nNATALIE：他们颠倒黑白。\nAlessio 把平板推到她面前，上面是 Julian 转移信托的证据。\nALESSIO：哭没有用。反击才有用。\nNatalie 深吸一口气，打开直播。镜头亮起的一瞬间，所有弹幕都在骂她。\n她抬起眼。\nNATALIE：Julian，你敢不敢当着所有人的面解释，这笔钱去了哪里？\n屏幕那头，Julian 的笑容僵住。',
+  },
+  {
+    ep: '第 6 集',
+    title: '第一次公开反击',
+    words: 936,
+    duration: '2 分 44 秒',
+    hook: '女主拿出关键证据，却被父亲逼着删掉直播。',
+    script:
+      'INT. 庄园书房 - 日\n直播人数暴涨到十万。Natalie 把转账记录一张张放到镜头前。\nNATALIE：婚礼前一天，你把我母亲留下的信托转到了 Elle 名下的空壳公司。\nJulian 慌了。\nJULIAN：这些都是伪造的！\n弹幕开始倒戈。就在这时，Natalie 的父亲打来电话。她接通外放，父亲的怒吼传出。\n父亲：立刻删掉直播！Julian 家能救我们，你别毁了一切！\nNatalie 的眼眶红了。\nNATALIE：所以你早就知道？\n电话那头沉默。沉默比承认更锋利。\nAlessio 站在阴影里，第一次没有替她做决定。\nNatalie 看着镜头，声音发哑却清楚。\nNATALIE：从今天起，我不会再替任何人牺牲。\n门外忽然响起巨响。Julian 带着律师和警察站在门口。\nJULIAN：Natalie，你涉嫌盗窃商业机密，跟我们走一趟。',
+  },
+  {
+    ep: '第 7 集',
+    title: '男主家族审判',
+    words: 951,
+    duration: '2 分 50 秒',
+    hook: '男主家族逼女主离开，男主却当众宣布她是未婚妻。',
+    script:
+      'INT. MORETTI 家族会议厅 - 夜\n长桌两侧坐满 Moretti 家族成员。Natalie 站在中央，像被推上审判席。\n长老：一个被自己家族抛弃的女人，没有资格进入 Moretti。\n另一人把 Julian 的报警文件摔在桌上。\n家族成员：她会把警方、媒体和敌人一起带进来。\nNatalie 握紧手指。\nNATALIE：我没有求你们接纳我。\n长老冷笑。\n长老：那就签字离开。Alessio 会给你一笔钱。\n文件推到她面前。Natalie 刚要开口，Alessio 从门外走进来。\nALESSIO：她不会签。\n长老：你为了她违抗家族？\nAlessio 走到 Natalie 身边，摘下自己的家族戒指，套在她手上。\nALESSIO：从今晚开始，她是我的未婚妻。\n全场哗然。戒指碰到 Natalie 项链的一瞬间，墙上的古老纹章亮了起来。',
+  },
+  {
+    ep: '第 8 集',
+    title: '免费卡点：纹章亮起',
+    words: 744,
+    duration: '2 分 40 秒',
+    hook: '女主签下婚姻协议前，母亲留下的纹章突然亮起。',
+    script:
+      'INT. 庄园书房 - 夜\nNatalie 的笔尖停在婚姻协议最后一页。Alessio 站在她身后，没有催促。\nNATALIE：签下它，我会失去什么？\nALESSIO：你现在还没有资格问这个问题。\n她低头看向母亲留下的项链。蓝宝石忽然裂开，一道古老纹章映在协议上。\n墙后的暗门应声打开，里面挂着一幅母亲年轻时的画像。画像里的女人，正戴着 Moretti 家族的戒指。\nNatalie 抬头，脸色发白。\nNATALIE：你早就知道我母亲来过这里？\nAlessio 的沉默比回答更危险。门外传来继妹的声音。\nELLE：姐姐，签完字，你就会知道自己到底是谁。',
+  },
+];
 
 export default function Home() {
   const [step, setStep] = useState<StepId>('create');
@@ -1508,12 +1546,31 @@ function ResultStep({
 
 function ScriptStep() {
   const [selected, setSelected] = useState(0);
-  const allEpisodes = [...episodes, freeEpisode];
-  const [drafts, setDrafts] = useState(() => allEpisodes.map((episode) => episode.script));
+  const freeEpisodes = [...episodes, ...freeArcEpisodes];
+  const [scriptStage, setScriptStage] = useState<'opening' | 'free' | 'full'>('opening');
+  const visibleEpisodes = scriptStage === 'opening' ? episodes : freeEpisodes;
+  const [drafts, setDrafts] = useState(() => freeEpisodes.map((episode) => episode.script));
   const [evaluationStatus, setEvaluationStatus] = useState<'已评估' | '待重新评估'>('已评估');
   const [evaluationVersion, setEvaluationVersion] = useState(1);
-  const currentEpisode = allEpisodes[selected];
+  const currentEpisode = visibleEpisodes[selected];
   const currentDraft = drafts[selected] ?? currentEpisode.script;
+  const stageCopy = {
+    opening: {
+      label: '前 3 集已生成',
+      helper: '修改并评估通过后，系统会继续生成第 4-8 集，组成完整一卡免费集。',
+      button: '保存修改并生成 1-8 集免费剧本',
+    },
+    free: {
+      label: '1-8 集免费段已生成',
+      helper: '现在可以检查完整免费段的节奏、钩子和第 8 集付费卡点。',
+      button: '保存修改并进入全集生成',
+    },
+    full: {
+      label: '已进入全集生成',
+      helper: '测试阶段先记录流程状态；真实版本会继续生成后续付费集与全集。',
+      button: '保存修改并重新评估',
+    },
+  }[scriptStage];
 
   const updateDraft = (value: string) => {
     setDrafts((items) => items.map((item, index) => (index === selected ? value : item)));
@@ -1529,16 +1586,26 @@ function ScriptStep() {
     }
   };
 
-  const reevaluate = () => {
+  const saveAndContinue = () => {
     setEvaluationStatus('已评估');
     setEvaluationVersion((version) => version + 1);
+    if (scriptStage === 'opening') {
+      setScriptStage('free');
+      setSelected(3);
+    } else if (scriptStage === 'free') {
+      setScriptStage('full');
+    }
   };
 
   return (
     <div className="grid grid-cols-[260px_minmax(0,1fr)] gap-5 max-lg:grid-cols-1">
       <Panel title="集数导航">
+        <div className="mb-3 rounded-md border border-[#d8cdbc] bg-[#fffdf9] p-3">
+          <p className="text-sm font-semibold text-[#2d261f]">{stageCopy.label}</p>
+          <p className="mt-1 text-xs leading-5 text-[#6b5f52]">{stageCopy.helper}</p>
+        </div>
         <div className="grid gap-2">
-          {allEpisodes.map((episode, index) => (
+          {visibleEpisodes.map((episode, index) => (
             <button
               key={episode.ep}
               onClick={() => setSelected(index)}
@@ -1556,9 +1623,23 @@ function ScriptStep() {
             </button>
           ))}
         </div>
-        <button className="mt-4 w-full rounded-md bg-[#201b16] px-3 py-2 text-sm font-semibold text-white">
-          生成到免费集
-        </button>
+        {scriptStage === 'opening' && (
+          <button
+            onClick={() => {
+              setScriptStage('free');
+              setSelected(3);
+              setEvaluationStatus('已评估');
+            }}
+            className="mt-4 w-full rounded-md bg-[#201b16] px-3 py-2 text-sm font-semibold text-white"
+          >
+            生成 1-8 集免费剧本
+          </button>
+        )}
+        {scriptStage === 'full' && (
+          <div className="mt-4 rounded-md border border-[#c9bba8] bg-[#f8f2e9] p-3 text-sm text-[#5d5147]">
+            全集生成入口已触发。当前测试版先停在状态确认，后续接入真实生成后会展开第 9 集以后内容。
+          </div>
+        )}
       </Panel>
       <Panel title={`${currentEpisode.ep}：${currentEpisode.title}`}>
         <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -1594,8 +1675,8 @@ function ScriptStep() {
           <div className="text-sm text-[#5d5147]">
             <strong>自动评估：</strong> 检查逻辑连续性、单集节奏、结尾卡点、付费驱动力和制作复杂度。
           </div>
-          <button onClick={reevaluate} className="rounded-md bg-[#201b16] px-3 py-2 text-sm font-semibold text-white">
-            保存修改并重新评估
+          <button onClick={saveAndContinue} className="rounded-md bg-[#201b16] px-3 py-2 text-sm font-semibold text-white">
+            {stageCopy.button}
           </button>
         </div>
       </Panel>
