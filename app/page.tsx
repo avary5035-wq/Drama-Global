@@ -39,6 +39,14 @@ type BeatKey =
   | '绑定关系';
 
 type BeatInstance = { id: string; key: BeatKey };
+type EventCandidate = {
+  title: string;
+  functionText: string;
+  scenes: string[];
+  hook: string;
+  emotion: string;
+  sources: string[];
+};
 
 const themeTags = [
   '现代豪门',
@@ -241,42 +249,42 @@ const beatCards: {
   {
     key: '原生困境',
     question: '女主为什么必须改变？',
-    selected: '婚礼前发现未婚夫与继妹合谋骗取信托',
-    functionText: '让女主原有生活当场崩塌，并制造羞辱、背叛和失去保护的压力。',
-    emotion: '虐感 / 羞辱 / 反击期待',
-    risk: '婚礼骗局常见，需要换场景或增加身份差异。',
+    selected: '女主被公开羞辱、背叛或诬陷，观众开始等待她翻盘',
+    functionText: '建立女主的初始低位和情绪债，让观众知道她为什么必须逃离、反击或改命。',
+    emotion: '憋屈 / 羞辱 / 反击期待',
+    risk: '原生困境不能只靠吵架，需要身份、证据、孩子或生命风险叠加。',
   },
   {
     key: '宿命羁绊',
     question: '男女主为什么必须产生关系？',
-    selected: '男主为躲避追杀闯入试衣间，被迫与女主假装亲密',
-    functionText: '让男女主在高压场景中发生非正常连接，同时制造暧昧和危险感。',
-    emotion: '刺激 / 禁忌 / 暧昧',
-    risk: '亲密桥段需要根据平台尺度调整。',
+    selected: '女主误认男主身份，并把他拉进假关系对抗外部压力',
+    functionText: '用误会、契约、救命、孩子或身份错认，让男女主形成不可回避的连接。',
+    emotion: '好奇 / 反转 / 暧昧',
+    risk: '羁绊必须有外部压力和情绪吸引，不能只是普通偶遇。',
   },
   {
     key: '宿命启动',
     question: '为什么这段关系不可替代？',
-    selected: '女主掌握男主家族诅咒的唯一解除线索',
-    functionText: '把偶然相遇升级为不可替代关系，让男主必须继续接近女主。',
+    selected: '女主或男主身上的隐藏身份、血脉、证据、孩子线被启动',
+    functionText: '把偶然连接升级为不可替代关系，让双方必须继续靠近。',
     emotion: '宿命感 / 好奇 / 权力反转',
-    risk: '诅咒线要避免设定过重拖慢前 3 集。',
+    risk: '宿命设定要尽早落到具体事件，避免解释过重。',
   },
   {
     key: '生存危机',
-    question: '为什么女主现在必须依靠男主？',
-    selected: '前任带人围堵女主，逼她签放弃遗产协议',
-    functionText: '让女主无法独立解决危机，男主出场展示保护能力和压迫感。',
-    emotion: '爽感 / 救场 / 打脸',
-    risk: '需要强视觉卡点，否则只是普通争吵。',
+    question: '为什么女主现在必须依靠男主，或男主必须保护女主？',
+    selected: '反派把女主推入生命、名誉、孩子或权力危机，男主保护与误伤并存',
+    functionText: '用强危机推动保护、误会、救援和追悔，放大爱情线的甜虐张力。',
+    emotion: '紧张 / 救场 / 甜虐',
+    risk: '危机要有强视觉或强情绪，不然只是普通冲突升级。',
   },
   {
     key: '绑定关系',
     question: '为什么两人必须长期在一起？',
-    selected: '契约婚姻换取庇护，女主成为男主家族名义继承人监护者',
-    functionText: '将短期救援转成长期关系，让后续同居、误会和亲密升级合理发生。',
-    emotion: '占有 / 拉扯 / 安全感',
-    risk: '契约条件要具体，不能只写“为了保护”。',
+    selected: '契约、婚约、合法身份、孩子或秘密任务让两人关系不可逆',
+    functionText: '将短期救援转成长期绑定，让同居、误会、亲密升级和身份引爆合理发生。',
+    emotion: '占有 / 拉扯 / 安全感 / 高燃',
+    risk: '绑定条件要具体，不能只写“为了保护”。',
   },
 ];
 
@@ -285,56 +293,176 @@ const initialBeatSequence: BeatInstance[] = beatCards.map((beat, index) => ({
   key: beat.key,
 }));
 
-const eventPool: Record<BeatKey, string[]> = {
+const eventPool: Record<BeatKey, EventCandidate[]> = {
   原生困境: [
-    '婚礼骗局曝光',
-    '被丈夫和闺蜜双重背叛',
-    '父亲欠债后把女主抵押给家族敌人',
-    '被继妹抢走身份和继承权',
-    '移民身份被前任威胁',
-    '母亲病危但银行卡被冻结',
-    '被家族当成联姻牺牲品',
-    '假千金身份被公开羞辱',
+    {
+      title: '公开羞辱女主身份',
+      functionText: '快速建立女主低位，制造观众对反击的期待。',
+      scenes: ['高端餐厅', '晚宴', '学校', '公司', '医院', '贵族聚会'],
+      hook: '卡在女主无法自证清白。',
+      emotion: '憋屈 / 愤怒',
+      sources: ['Brides in Smoke', 'XXL Outcast'],
+    },
+    {
+      title: '小三或假妻子登场',
+      functionText: '挑战女主的合法性，把婚恋关系推向正面对峙。',
+      scenes: ['婚礼', '医院', '别墅门口', '慈善宴'],
+      hook: '卡在男主即将选择谁。',
+      emotion: '憋屈 / 紧张',
+      sources: ['Brides in Smoke', 'DramaWave_A Rainha Voltou ao Jogo'],
+    },
+    {
+      title: '孩子或怀孕危机',
+      functionText: '用母性和生命风险放大女主困境。',
+      scenes: ['产房', '楼梯', '行李箱', '急救室', '车祸现场'],
+      hook: '卡在医生或救援者带来坏消息。',
+      emotion: '恐惧 / 心疼',
+      sources: ["They Don't Know I'm the Don's Pregnant Queen", 'DramaWave_A Rainha Voltou ao Jogo'],
+    },
+    {
+      title: '被诬陷出轨、偷窃或伤人',
+      functionText: '让女主名誉崩塌，推动证据线和反击线。',
+      scenes: ['酒店房间', '展会', '监控盲区', '直播间'],
+      hook: '卡在证据被反派掌控。',
+      emotion: '憋屈 / 反击期待',
+      sources: ['XXL Outcast', 'Brides in Smoke'],
+    },
   ],
   宿命羁绊: [
-    '躲避追杀时被迫假装情侣',
-    '救下男主的孩子后被叫 Mommy',
-    '一夜情后发现灵魂印记',
-    '误闯男主禁区并触发契约',
-    '女主替别人完成危险交易',
-    '男主失控时只有女主能靠近',
-    '被献祭给昏迷王子',
-    '同乘电梯遭遇停电危机',
+    {
+      title: '女主误认男主身份',
+      functionText: '女主把真实未婚夫、权贵、黑帮老大误认为男模、司机、保镖或普通人。',
+      scenes: ['酒吧', '酒店', '机场', '婚礼后台', '医院走廊'],
+      hook: '卡在男主知道真相但不说。',
+      emotion: '反转 / 暧昧',
+      sources: ['Fated to Love You', 'Brides in Smoke'],
+    },
+    {
+      title: '假情侣或假婚姻挡箭牌',
+      functionText: '女主为对抗逼婚、家族羞辱或前任刺激，临时拉男主假扮伴侣。',
+      scenes: ['家宴', '订婚宴', '发布会', '公司会议'],
+      hook: '卡在假关系被迫公开。',
+      emotion: '刺激 / 好奇',
+      sources: ['Fated to Love You'],
+    },
+    {
+      title: '救命关系埋钩',
+      functionText: '一方救过另一方，但身份被隐藏、遗忘或被别人冒领。',
+      scenes: ['车祸', '火灾', '雨夜', '绑架', '狼人袭击'],
+      hook: '卡在真正救命证据即将出现。',
+      emotion: '宿命 / 亏欠',
+      sources: ['XXL Outcast', "They Don't Know I'm the Don's Pregnant Queen"],
+    },
+    {
+      title: '禁忌三角连接',
+      functionText: '女主在名义伴侣和真正吸引对象之间被迫撕扯，制造危险亲密。',
+      scenes: ['公路旅行', '豪宅同住', '家族度假', '密闭车厢'],
+      hook: '卡在即将被第三方发现。',
+      emotion: '甜 / 危险 / 拉扯',
+      sources: ['Endless Desire Highway'],
+    },
   ],
   宿命启动: [
-    '女主是唯一兼容体质',
-    '女主血脉能解除诅咒',
-    '女主掌握男主敌人的证据',
-    '女主是失踪继承人的母亲',
-    '女主与男主有王族婚约',
-    '男主发现女主曾救过自己',
-    '女主能唤醒男主第二人格',
-    '女主身上的胎记对应预言',
+    {
+      title: '男主真实身份线启动',
+      functionText: '用一句称呼、一个权限或一次救场，让观众意识到男主不是普通人。',
+      scenes: ['董事会', '黑帮集会', '王室议会', '医院 VIP 通道'],
+      hook: '卡在众人跪服或称呼出口。',
+      emotion: '震惊 / 高燃',
+      sources: ["They Don't Know I'm the Don's Pregnant Queen", 'Fated to Love You'],
+    },
+    {
+      title: '女主真实身份线启动',
+      functionText: '女主的血脉、继承、马甲、前世记忆或旧物开始发挥作用。',
+      scenes: ['亲子鉴定', '王室血脉', '集团继承', '前世记忆', '隐藏马甲'],
+      hook: '卡在证据打开前一秒。',
+      emotion: '爽 / 震惊',
+      sources: ['XXL Outcast', 'Fated to Love You'],
+    },
+    {
+      title: '救命恩被重新指认',
+      functionText: '过去的救命关系被唤醒，男女主关系从偶然变成命定。',
+      scenes: ['旧照片', '伤疤', '母亲遗物', '监控回放', '证人口供'],
+      hook: '卡在真正救命证据即将出现。',
+      emotion: '宿命 / 亏欠',
+      sources: ['XXL Outcast', 'Fated to Love You'],
+    },
+    {
+      title: '假身份开始露馅',
+      functionText: '假妻子、假千金或冒领救命恩人的反派出现破绽。',
+      scenes: ['监控', 'DNA', '旧物', '证人', '伤疤'],
+      hook: '卡在反派还嘴硬。',
+      emotion: '悬念 / 解气预期',
+      sources: ['Brides in Smoke', 'DramaWave_A Rainha Voltou ao Jogo'],
+    },
   ],
   生存危机: [
-    '前任围堵逼签协议',
-    '酒吧骚扰男主救场',
-    '被下药后男主及时出现',
-    '家族晚宴公开羞辱',
-    '黑帮追杀误伤女主',
-    '医院缴费窗口崩溃',
-    '被赶出家门遭暴雨围困',
-    '直播现场被反派揭短',
+    {
+      title: '男主暗中保护',
+      functionText: '保持甜感，同时继续保留身份悬念。',
+      scenes: ['资金救场', '医生安排', '保镖清场', '舆论压制'],
+      hook: '卡在女主不知道是谁帮她。',
+      emotion: '甜 / 安全感',
+      sources: ['Fated to Love You'],
+    },
+    {
+      title: '男主因信息差误伤女主',
+      functionText: '制造虐点和追悔空间，但需要让误会有可信理由。',
+      scenes: ['误信小三', '误认假证据', '为大局隐瞒真相'],
+      hook: '卡在女主心碎离开。',
+      emotion: '虐 / 追悔',
+      sources: ["They Don't Know I'm the Don's Pregnant Queen"],
+    },
+    {
+      title: '男主暴力救援',
+      functionText: '制造强保护欲和强爽点，让男主权力短暂外露。',
+      scenes: ['黑帮围攻', '直升机救援', '破门而入', '婚礼抢人'],
+      hook: '卡在男主真实权力暴露。',
+      emotion: '爽 / 高燃',
+      sources: ["They Don't Know I'm the Don's Pregnant Queen", 'Fated to Love You'],
+    },
+    {
+      title: '男主第一次动摇',
+      functionText: '男主从冷漠或误会转向相信女主，感情开始真正变化。',
+      scenes: ['医院陪护', '独自带娃', '看到伤口', '听到真相片段'],
+      hook: '卡在他要不要道歉。',
+      emotion: '心疼 / 甜虐',
+      sources: ['XXL Outcast', 'Fated to Love You'],
+    },
   ],
   绑定关系: [
-    '契约婚姻',
-    '假订婚',
-    '灵魂伴侣印记',
-    '怀上继承人',
-    '成为孩子名义母亲',
-    '被男主家族宣告保护',
-    '共同继承一笔遗产',
-    '女主成为解除诅咒的长期对象',
+    {
+      title: '假情侣或假婚姻转长期契约',
+      functionText: '女主为对抗逼婚、羞辱或前任，和男主形成长期绑定。',
+      scenes: ['家宴', '订婚宴', '发布会', '公司会议'],
+      hook: '卡在假关系被迫公开。',
+      emotion: '刺激 / 好奇',
+      sources: ['Fated to Love You'],
+    },
+    {
+      title: '男女主合法关系公开',
+      functionText: '把暧昧或误认关系升级成“她才是真正的妻子/未婚妻”。',
+      scenes: ['婚礼', '家宴', '记者会', '警局', '医院'],
+      hook: '卡在男主会不会承认她。',
+      emotion: '甜 / 高燃',
+      sources: ['Brides in Smoke', 'Fated to Love You'],
+    },
+    {
+      title: '女主用专业能力换取留在男主身边',
+      functionText: '女主证明自己不可替代，绑定关系从被保护变成互相需要。',
+      scenes: ['珠宝展', '击剑对决', '商业谈判', '医学诊断', '设计大赛'],
+      hook: '卡在她刚要开口或出手。',
+      emotion: '解气 / 反转',
+      sources: ['Fated to Love You', 'XXL Outcast'],
+    },
+    {
+      title: '女主不再求男主',
+      functionText: '让女主从情感低位转为主动选择，倒逼男主追悔并重新绑定。',
+      scenes: ['离婚声明', '搬离豪宅', '拒绝回家', '公开切割'],
+      hook: '卡在男主追上来。',
+      emotion: '爽 / 心疼',
+      sources: ['DramaWave_A Rainha Voltou ao Jogo', 'XXL Outcast'],
+    },
   ],
 };
 
@@ -1380,18 +1508,27 @@ function BeatsStep({
           <div className="grid gap-2">
             {eventPool[selectedBeat].map((event, index) => (
               <button
-                key={event}
+                key={event.title}
                 onClick={() => toggleLock(selectedBeatId)}
-                className={`flex items-center justify-between rounded-md border px-3 py-2.5 text-left text-sm ${
+                className={`rounded-md border px-3 py-3 text-left text-sm ${
                   index === 0
                     ? 'border-[#cf4f35] bg-[#fff0ea]'
                     : 'border-[#ded6c8] bg-white'
                 }`}
               >
-                <span>{event}</span>
-                <span className="text-xs text-[#817363]">
-                  匹配 {96 - index * 4}%
-                </span>
+                <div className="flex items-start justify-between gap-3">
+                  <span className="font-semibold text-[#2d261f]">{event.title}</span>
+                  <span className="shrink-0 text-xs text-[#817363]">匹配 {96 - index * 4}%</span>
+                </div>
+                <p className="mt-2 leading-6 text-[#5d5147]">{event.functionText}</p>
+                <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
+                  <span className="rounded bg-white/80 px-2 py-1 text-[#817363]">{event.emotion}</span>
+                  <span className="rounded bg-white/80 px-2 py-1 text-[#817363]">
+                    场景：{event.scenes.slice(0, 3).join(' / ')}
+                  </span>
+                </div>
+                <p className="mt-2 text-xs font-medium text-[#9d321d]">{event.hook}</p>
+                <p className="mt-1 text-xs text-[#817363]">样本：{event.sources.join('、')}</p>
               </button>
             ))}
           </div>
