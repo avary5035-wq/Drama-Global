@@ -466,6 +466,225 @@ const eventPool: Record<BeatKey, EventCandidate[]> = {
   ],
 };
 
+// Weekly learning update: events distilled from the 12 overseas AI short-drama titles
+// read from the Feishu source on 2026-09-08. Each event is stored by its fixed
+// female-romance mother beat so Mode A can reuse the function without copying plot text.
+const weeklyLearnedEvents: Record<BeatKey, EventCandidate[]> = {
+  原生困境: [
+    {
+      title: '豪门育儿岗位羞辱式面试',
+      functionText: '把求职、生存和阶层羞辱压缩到一个开场事件，立即建立女主低位和照护动机。',
+      scenes: ['豪门面试厅', '育儿房', '贵族宅邸'],
+      hook: '卡在女主被要求接受更屈辱的检查，或孩子突然只认她。',
+      emotion: '羞辱 / 心疼 / 反击期待',
+      sources: ["The Billionaire's Wet Nurse"],
+    },
+    {
+      title: '贫穷丈夫误认与婚姻压力',
+      functionText: '用贫富错位和婚姻现实压力建立女主的情感缺口，为后续身份反转留空间。',
+      scenes: ['登记处', '租住公寓', '家族家宴'],
+      hook: '卡在丈夫露出不符合“贫穷”身份的资源或权限。',
+      emotion: '委屈 / 好奇 / 期待反转',
+      sources: ['Mi Pobre Esposo es Billonario (Doblado)'],
+    },
+    {
+      title: '底层身份长期受辱',
+      functionText: '让主角被当作清洁工、实习生或无名小人物，先压低社会位置，再为强者回归蓄力。',
+      scenes: ['写字楼', '后勤通道', '公开宴会'],
+      hook: '卡在所有人要求他背锅，而他即将第一次出手。',
+      emotion: '憋屈 / 忍耐 / 爽感预期',
+      sources: ['THE JANITOR Rise of The Prime'],
+    },
+    {
+      title: '家人失踪留下唯一线索',
+      functionText: '用亲人失踪把家庭情感和超能谜团绑定，给主角一个必须继续追查的目标。',
+      scenes: ['失踪现场', '监控室', '太空/实验线索'],
+      hook: '卡在失踪者留下异常影像或仍然活着的证据。',
+      emotion: '焦虑 / 心疼 / 悬念',
+      sources: ['Their Brother Lost In Space'],
+    },
+    {
+      title: '专业女性被资本系统压制',
+      functionText: '用职场权力差制造女主的现实困境，让后续专业反击具备情绪收益。',
+      scenes: ['律所', '航空公司会议室', '听证会'],
+      hook: '卡在女主拿到能击穿对手的第一份证据。',
+      emotion: '压抑 / 愤怒 / 反击期待',
+      sources: ['The Lawyer Who Bankrupted the Airline'],
+    },
+  ],
+  宿命羁绊: [
+    {
+      title: '救命者与照护对象形成豪门绑定',
+      functionText: '把育儿、救命和豪门家主关系合并，让女主进入男主生活有具体理由。',
+      scenes: ['豪门育儿房', '庄园走廊', '坠落救援现场'],
+      hook: '卡在男主以隐藏身份救下女主，女主却不知道救命者是谁。',
+      emotion: '依赖 / 暧昧 / 宿命感',
+      sources: ["The Billionaire's Wet Nurse"],
+    },
+    {
+      title: '封闭空间同行放大危险亲密',
+      functionText: '用公路、车辆或临时共处把身体吸引和控制权争夺变成不可回避的关系。',
+      scenes: ['公路', '车内', '临时落脚点'],
+      hook: '卡在身体界限被打破，双方必须面对关系后果。',
+      emotion: '暧昧 / 危险 / 拉扯',
+      sources: ['Endless Desire Highway'],
+    },
+    {
+      title: '萌宝认亲成为 CEO 关系入口',
+      functionText: '让孩子成为男女主重连的主动连接器，同时带出家族与亲子冲突。',
+      scenes: ['公司大厅', '幼儿园', '豪门家宴'],
+      hook: '卡在孩子喊出关键称呼或亲子鉴定结果即将公布。',
+      emotion: '惊喜 / 心软 / 甜宠期待',
+      sources: ["The Baby Came Knocking CEO Daddy You're Mine"],
+    },
+    {
+      title: '五位兽夫契约启动多关系线',
+      functionText: '用契约把多位功能型角色绑定到女主复仇任务，形成可分层推进的关系群。',
+      scenes: ['契约仪式', '兽人领地', '团队集结'],
+      hook: '卡在第一位伴侣站队，或第二位伴侣带着敌意出现。',
+      emotion: '新鲜 / 占有 / 多线期待',
+      sources: ['Taming My Five Beast Husbands'],
+    },
+  ],
+  宿命启动: [
+    {
+      title: '黑狼变身暴露男主异常身份',
+      functionText: '用一次强视觉救援把关系从偶然相遇升级为世界规则和身份秘密。',
+      scenes: ['悬崖边', '雨夜', '禁区'],
+      hook: '卡在女主看见黑狼真身，却还不知道他就是身边的男人。',
+      emotion: '震惊 / 救赎 / 好奇',
+      sources: ["The Billionaire's Wet Nurse"],
+    },
+    {
+      title: '隐藏继承人露出权限破绽',
+      functionText: '用一次专业判断、权限调用或家族物件启动女主真实身份线。',
+      scenes: ['医院', '董事会', '继承文件室'],
+      hook: '卡在旁人发现她拥有不该拥有的权限。',
+      emotion: '爽感 / 紧张 / 身份悬念',
+      sources: ['The Undercover Heiress in Ward'],
+    },
+    {
+      title: '亿万富翁身份从资源使用中露馅',
+      functionText: '不直接揭示身份，而是先让男主动用不匹配的资源，逐步制造身份破绽。',
+      scenes: ['豪门家宴', '危机现场', '公司会议'],
+      hook: '卡在女主追问“你到底是谁”，男主仍然拒答。',
+      emotion: '好奇 / 甜宠 / 反转预期',
+      sources: ['Mi Pobre Esposo es Billonario (Doblado)'],
+    },
+    {
+      title: '归来女王亮出第一张底牌',
+      functionText: '用一次公开亮相和旧敌失势，把女主从失势者切换成主动操盘者。',
+      scenes: ['归来宴会', '董事会', '公开发布会'],
+      hook: '卡在女主说出旧敌最害怕的身份或证据。',
+      emotion: '高燃 / 解气 / 期待升级',
+      sources: ['DramaWave_A Rainha Voltou ao Jogo'],
+    },
+  ],
+  生存危机: [
+    {
+      title: '黑狼接住坠落女主',
+      functionText: '以强视觉救援同时完成危险升级、男主保护和身份悬念。',
+      scenes: ['高处坠落', '禁区', '狼群追击'],
+      hook: '卡在女主被黑狼接住后，抬头看见熟悉的眼睛。',
+      emotion: '恐惧 / 救赎 / 心跳',
+      sources: ["The Billionaire's Wet Nurse"],
+    },
+    {
+      title: '黑帮孕情与追杀并行',
+      functionText: '把孩子、身体风险和黑帮权力斗争叠加，快速提高女主的生存成本。',
+      scenes: ['黑帮仓库', '医院', '逃亡车辆'],
+      hook: '卡在追杀者发现孕情，或男主为保护孩子暴露权力。',
+      emotion: '恐惧 / 心疼 / 高压',
+      sources: ["They Don't Know I'm the Don's Pregnant Queen"],
+    },
+    {
+      title: '资本系统反扑封锁证据',
+      functionText: '让女主的专业反击面对现实代价，避免“拿到证据就立即胜利”。',
+      scenes: ['听证会', '公司封锁', '媒体发布会'],
+      hook: '卡在关键证人被带走或证据即将被销毁。',
+      emotion: '紧张 / 愤怒 / 追击',
+      sources: ['The Lawyer Who Bankrupted the Airline'],
+    },
+    {
+      title: '超能追踪逼近失踪真相',
+      functionText: '将家人线索转化为现实追杀，让寻找任务具备即时危险。',
+      scenes: ['实验室', '地下通道', '城市追踪'],
+      hook: '卡在主角发现追踪者拥有与失踪者相同的能力。',
+      emotion: '悬疑 / 恐惧 / 追查',
+      sources: ['Their Brother Lost In Space'],
+    },
+  ],
+  绑定关系: [
+    {
+      title: '照护岗位转为长期同居契约',
+      functionText: '把短期育儿工作升级为长期共处，让日常照护自然承载暧昧和身份秘密。',
+      scenes: ['豪门庄园', '育儿房', '家庭晚餐'],
+      hook: '卡在男主提出只有女主能留下的特殊条件。',
+      emotion: '依赖 / 暧昧 / 安全感',
+      sources: ["The Billionaire's Wet Nurse"],
+    },
+    {
+      title: '孩子把陌生男女锁进共同监护',
+      functionText: '以亲子责任迫使男女主长期合作，使关系推进不依赖偶然见面。',
+      scenes: ['共同监护协议', '学校', '豪门家宴'],
+      hook: '卡在亲子关系被公开，双方必须共同面对家族。',
+      emotion: '甜宠 / 紧张 / 责任感',
+      sources: ["The Baby Came Knocking CEO Daddy You're Mine"],
+    },
+    {
+      title: '重生女主与多位伴侣建立功能契约',
+      functionText: '让每一位伴侣承担不同能力和情感功能，支撑长剧多线并行。',
+      scenes: ['契约大厅', '任务地图', '共同战斗'],
+      hook: '卡在新契约签下后，前世仇人同步现身。',
+      emotion: '占有 / 团队感 / 爽感',
+      sources: ['Taming My Five Beast Husbands'],
+    },
+    {
+      title: '婚姻误认转为真实伴侣选择',
+      functionText: '先用贫富误认制造关系错位，再让男主用真实资源证明保护和承诺。',
+      scenes: ['登记处', '家族晚宴', '危机救场'],
+      hook: '卡在男主第一次公开站到女主身边，身份却仍未揭开。',
+      emotion: '误会 / 甜宠 / 期待揭示',
+      sources: ['Mi Pobre Esposo es Billonario (Doblado)'],
+    },
+  ],
+};
+
+Object.entries(weeklyLearnedEvents).forEach(([beat, events]) => {
+  eventPool[beat as BeatKey].push(...events);
+});
+
+type LearningPattern = {
+  title: string;
+  structure: string;
+  writing: string;
+  cliffhanger: string;
+};
+
+// These are benchmark patterns for scoring and generation. They describe reusable
+// craft functions, not copied text or a promise that the model has been retrained.
+const weeklyLearningCorpus: LearningPattern[] = [
+  { title: "The Billionaire's Wet Nurse", structure: '照护入口→身份错位→强视觉救援→豪门长期绑定', writing: '用短对白和权力差快速建立人物位置', cliffhanger: '面试羞辱、黑狼救人、身份追问' },
+  { title: 'Endless Desire Highway', structure: '封闭同行→身体界限试探→控制失效→关系后果', writing: '用空间限制把欲望写成连续动作', cliffhanger: '车内越界、身体距离、下一步选择' },
+  { title: 'The Lawyer Who Bankrupted the Airline', structure: '职场压制→证据搜集→专业反击→资本反扑', writing: '让专业行动承担情绪爽点', cliffhanger: '证据出现、证人失联、对手反制' },
+  { title: "They Don't Know I'm the Don's Pregnant Queen", structure: '孕情暴露→黑帮追杀→母子保护→女王身份回归', writing: '把身体风险和权力风险叠加', cliffhanger: '孕情、孩子筹码、暴力救援' },
+  { title: 'Their Brother Lost In Space', structure: '亲人失踪→异常线索→超能追踪→失踪真相', writing: '每次解释都带出更大的问题', cliffhanger: '影像、坐标、能力同源' },
+  { title: 'The Undercover Heiress in Ward', structure: '潜伏受压→专业露锋→身份试探→继承人反击', writing: '用可验证的专业动作代替空泛马甲', cliffhanger: '权限破绽、遗嘱线索、身份暴露' },
+  { title: "The Hockey Captain's Secret Lessons", structure: '秘密课程→校园压力→特殊保护→关系公开', writing: '用训练动作承载暧昧和冲突', cliffhanger: '队长保护、误会、公开承认' },
+  { title: 'DramaWave_A Rainha Voltou ao Jogo', structure: '失势离场→女王归来→旧敌挑衅→公开清算', writing: '回归场景先给情绪兑现，再补底牌', cliffhanger: '归来亮相、旧敌失势、底牌亮出' },
+  { title: "The Baby Came Knocking CEO Daddy You're Mine", structure: '萌宝认亲→共同照护→家族阻力→亲子兑现', writing: '用孩子主动行为推动成人关系', cliffhanger: '关键称呼、鉴定结果、家族阻拦' },
+  { title: 'THE JANITOR Rise of The Prime', structure: '底层受辱→隐藏能力→第一次救场→强者回归', writing: '先延迟能力展示，集中释放一次', cliffhanger: '受辱、救场、强敌认出' },
+  { title: 'Taming My Five Beast Husbands', structure: '重生目标→多伴侣契约→团队组建→前世仇人', writing: '用角色功能差异支撑多线关系', cliffhanger: '第一契约、第二角色、前世仇人' },
+  { title: 'Mi Pobre Esposo es Billonario (Doblado)', structure: '贫富误认→婚姻共处→资源破绽→财富身份反转', writing: '身份反转通过资源细节逐步露出', cliffhanger: '契约婚姻、豪门救场、身份破绽' },
+];
+
+const weeklyLearningStats = {
+  titles: weeklyLearningCorpus.length,
+  sourceDocs: 23,
+  learnedEvents: Object.values(weeklyLearnedEvents).reduce((total, events) => total + events.length, 0),
+  benchmarkDimensions: ['Beat 编排', '开场抓点', '关系升级', '集尾卡点', '付费驱动力', '差异化风险'],
+};
+
 const episodes = [
   {
     ep: '第 1 集',
@@ -928,6 +1147,7 @@ function CreateStep({
     const parsed: HitShow = {
       id: 'custom-hit',
       title: uploadKind === 'link' ? '来自播放链接的待解析爆款' : fileName || '用户上传的爆款剧',
+      genre: '待解析类型',
       platform: uploadKind === 'video' ? '视频解析' : uploadKind === 'link' ? '链接解析' : '文本解析',
       updated: '刚刚加入',
       episodes: '解析后识别集数 · 卡点待确认',
@@ -1842,6 +2062,23 @@ function RightPanel({
           </div>
         </Panel>
 
+        <Panel title="爆款学习基准">
+          <div className="space-y-3 text-sm leading-6 text-[#5d5147]">
+            <div className="grid grid-cols-2 gap-2">
+              <LearningStat label="本周剧本" value={`${weeklyLearningStats.titles} 部`} />
+              <LearningStat label="已读文档" value={`${weeklyLearningStats.sourceDocs} 份`} />
+              <LearningStat label="回填事件" value={`${weeklyLearningStats.learnedEvents} 条`} />
+              <LearningStat label="评分维度" value={`${weeklyLearningStats.benchmarkDimensions.length} 项`} />
+            </div>
+            <p>
+              评分与生成会参考本周样本的 Beat 编排、开场抓点、关系升级、集尾卡点、付费驱动力和差异化风险。
+            </p>
+            <p className="text-xs text-[#817363]">
+              参考的是事件功能和写作规律，不复制原剧文本、角色名或具体台词。
+            </p>
+          </div>
+        </Panel>
+
         <Panel title="风险与建议">
           <div className="space-y-3 text-sm leading-6">
             <Risk
@@ -1883,6 +2120,15 @@ function RightPanel({
         </Panel>
       </div>
     </aside>
+  );
+}
+
+function LearningStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-[#ded6c8] bg-[#fffdf9] px-2 py-2">
+      <div className="text-xs text-[#817363]">{label}</div>
+      <div className="mt-1 font-semibold text-[#2d261f]">{value}</div>
+    </div>
   );
 }
 
