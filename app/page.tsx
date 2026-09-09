@@ -774,7 +774,11 @@ export default function Home() {
     initialBeatSequence,
   );
   const [selectedBeatId, setSelectedBeatId] = useState('beat-1');
-  const [locked, setLocked] = useState<string[]>(['beat-3']);
+  const [locked, setLocked] = useState<string[]>([]);
+  const [selectedEventByBeat, setSelectedEventByBeat] = useState<Record<string, string>>(
+    Object.fromEntries(initialBeatSequence.map((item) => [item.id, eventPool[item.key][0]?.title ?? ''])),
+  );
+  const [recommendationOffsetByBeat, setRecommendationOffsetByBeat] = useState<Record<string, number>>({});
   const [tone, setTone] = useState('强爽感');
 
   const selectedInstance =
@@ -797,6 +801,25 @@ export default function Home() {
         ? items.filter((item) => item !== beatId)
         : [...items, beatId],
     );
+  };
+
+  const selectEvent = (beatId: string, eventTitle: string) => {
+    setSelectedEventByBeat((current) => ({ ...current, [beatId]: eventTitle }));
+  };
+
+  const recommendEvents = (beatId: string, beatKey: BeatKey) => {
+    const total = eventPool[beatKey].length;
+    if (!total) return;
+    const nextOffset = ((recommendationOffsetByBeat[beatId] ?? 0) + 1) % total;
+    setRecommendationOffsetByBeat((current) => ({
+      ...current,
+      [beatId]: nextOffset,
+    }));
+    setSelectedEventByBeat((current) => ({
+      ...current,
+      [beatId]: eventPool[beatKey][nextOffset]?.title ?? current[beatId] ?? '',
+    }));
+    setLocked((items) => items.filter((id) => id !== beatId));
   };
 
   const moveBeat = (beatId: string, direction: -1 | 1) => {
@@ -880,6 +903,7 @@ export default function Home() {
                 selectedBeatId,
                 beatSequence,
                 lockedBeats: locked,
+                selectedEvents: selectedEventByBeat,
               };
             },
           },
@@ -948,7 +972,7 @@ export default function Home() {
     }
 
     return () => lifecycle.abort();
-  }, [beatSequence, contentTrack, customHit, locked, mode, productionType, selectedBeat, selectedBeatId, selectedHitId, step]);
+  }, [beatSequence, contentTrack, customHit, locked, mode, productionType, selectedBeat, selectedBeatId, selectedHitId, selectedEventByBeat, step]);
 
   return (
     <main className="min-h-screen bg-[#f6f4ef] text-[#201b16]">
@@ -1085,6 +1109,10 @@ export default function Home() {
                 currentBeat={currentBeat}
                 locked={locked}
                 toggleLock={toggleLock}
+                selectedEventByBeat={selectedEventByBeat}
+                recommendationOffsetByBeat={recommendationOffsetByBeat}
+                selectEvent={selectEvent}
+                recommendEvents={recommendEvents}
                 setStep={setStep}
               />
             )}
@@ -1586,6 +1614,10 @@ function BeatsStep({
   currentBeat,
   locked,
   toggleLock,
+  selectedEventByBeat,
+  recommendationOffsetByBeat,
+  selectEvent,
+  recommendEvents,
   setStep,
 }: {
   selectedBeatId: string;
@@ -1598,10 +1630,20 @@ function BeatsStep({
   currentBeat: (typeof beatCards)[number];
   locked: string[];
   toggleLock: (value: string) => void;
+  selectedEventByBeat: Record<string, string>;
+  recommendationOffsetByBeat: Record<string, number>;
+  selectEvent: (beatId: string, eventTitle: string) => void;
+  recommendEvents: (beatId: string, beatKey: BeatKey) => void;
   setStep: (value: StepId) => void;
 }) {
   const currentInstance = beatSequence.find((item) => item.id === selectedBeatId);
   const selectedBeat = currentInstance?.key ?? '原生困境';
+  const events = eventPool[selectedBeat];
+  const offset = recommendationOffsetByBeat[selectedBeatId] ?? 0;
+  const recommendedEvents = events.length
+    ? [...events.slice(offset), ...events.slice(0, offset)]
+    : [];
+  const selectedEvent = selectedEventByBeat[selectedBeatId] ?? recommendedEvents[0]?.title ?? '';
 
   return (
     <div className="grid gap-5">
@@ -1726,19 +1768,22 @@ function BeatsStep({
         <Panel title={`${currentBeat.key}：候选事件池`}>
           <p className="mb-3 text-sm text-[#6b5f52]">{currentBeat.risk}</p>
           <div className="grid gap-2">
-            {eventPool[selectedBeat].map((event, index) => (
+            {recommendedEvents.map((event, index) => (
               <button
                 key={event.title}
-                onClick={() => toggleLock(selectedBeatId)}
+                type="button"
+                onClick={() => selectEvent(selectedBeatId, event.title)}
                 className={`rounded-md border px-3 py-3 text-left text-sm ${
-                  index === 0
+                  selectedEvent === event.title
                     ? 'border-[#cf4f35] bg-[#fff0ea]'
                     : 'border-[#ded6c8] bg-white'
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <span className="font-semibold text-[#2d261f]">{event.title}</span>
-                  <span className="shrink-0 text-xs text-[#817363]">匹配 {96 - index * 4}%</span>
+                  <span className="shrink-0 text-xs text-[#817363]">
+                    {selectedEvent === event.title ? '已选中' : `匹配 ${96 - index * 4}%`}
+                  </span>
                 </div>
                 <p className="mt-2 leading-6 text-[#5d5147]">{event.functionText}</p>
                 <div className="mt-2 flex flex-wrap gap-1.5 text-xs">
@@ -1759,7 +1804,11 @@ function BeatsStep({
             >
               {locked.includes(selectedBeatId) ? '取消锁定' : '锁定事件'}
             </button>
-            <button className="flex-1 rounded-md bg-[#201b16] px-3 py-2 text-sm font-semibold text-white">
+            <button
+              type="button"
+              onClick={() => recommendEvents(selectedBeatId, selectedBeat)}
+              className="flex-1 rounded-md bg-[#201b16] px-3 py-2 text-sm font-semibold text-white"
+            >
               重新推荐
             </button>
           </div>
