@@ -31,6 +31,36 @@ type ProductionType = 'AI 剧' | '真人剧';
 type GenerationMode = '结构事件库组合' | '爆款迭代';
 type ContentTrack = '女频爱情剧' | '女频逆袭爽剧';
 type StepId = 'create' | 'brief' | 'beats' | 'result' | 'script';
+type ProjectParams = {
+  targetMarket: string;
+  targetPlatforms: string[];
+  totalEpisodes: string;
+  freeEpisode: string;
+  episodeLength: string;
+};
+type CharacterBio = {
+  heroine: string;
+  heroineWant: string;
+  heroineNeed: string;
+  hero: string;
+  heroGives: string;
+};
+type BriefConfig = {
+  selectedThemes: string[];
+  storyType: string;
+  coreBond: string;
+  tone: string;
+};
+type GeneratedPlan = {
+  title: string;
+  logline: string;
+  storySummary: string;
+  sellingPoints: string;
+  freeHook: string;
+  hookReason: string;
+  reasoning: string[];
+  episodePreview: [string, string, string][];
+};
 type BeatKey =
   | '原生困境'
   | '宿命羁绊'
@@ -116,6 +146,139 @@ const emotionModes = [
   '暧昧拉扯',
   '治愈成长',
 ];
+
+const marketOptions = ['北美 / 英语区', '东南亚 / 英语区', '拉美 / 西语区', '中东 / 英语字幕'];
+const platformOptions = ['ReelShort', 'DramaBox', 'ShortMax', 'GoodShort', 'FlexTV', 'NetShort'];
+const totalEpisodeOptions = ['40', '48', '56', '60', '72', '80'];
+const freeEpisodeOptions = ['6', '7', '8', '9', '10'];
+const episodeLengthOptions = ['800 字以内', '1000 字以内', '1200 字以内', '按参考爆款'];
+
+const initialProjectParams: ProjectParams = {
+  targetMarket: '北美 / 英语区',
+  targetPlatforms: ['ReelShort', 'DramaBox'],
+  totalEpisodes: '60',
+  freeEpisode: '8',
+  episodeLength: '1000 字以内',
+};
+
+const initialCharacterBio: CharacterBio = {
+  heroine: 'Natalie，破产家族继承人，被未婚夫设计骗婚。',
+  heroineWant: '拿回母亲留下的信托，摆脱父亲债务。',
+  heroineNeed: '重新获得安全感、尊严和人生掌控权。',
+  hero: 'Alessio，危险的黑帮继承人，掌握权力但背负家族诅咒。',
+  heroGives: '庇护、身份转换、复仇资源、权力背书。',
+};
+
+const initialBriefConfig: BriefConfig = {
+  selectedThemes: ['现代豪门', '黑帮家族', '契约婚姻', '身份掉马'],
+  storyType: '先虐后爽',
+  coreBond: '契约婚姻',
+  tone: '强爽感',
+};
+
+function selectedEventDetails(
+  beatSequence: BeatInstance[],
+  selectedEventByBeat: Record<string, string>,
+) {
+  return beatSequence.map((beat) => {
+    const eventTitle = selectedEventByBeat[beat.id];
+    const fallback = eventPool[beat.key][0];
+    const event =
+      eventPool[beat.key].find((item) => item.title === eventTitle) ?? fallback;
+    return { beat, event };
+  });
+}
+
+function cleanSentence(value: string) {
+  return value.trim().replace(/[。；，,.!?！？]+$/u, '');
+}
+
+function buildGeneratedPlan({
+  mode,
+  selectedHit,
+  brief,
+  projectParams,
+  characterBio,
+  beatSequence,
+  selectedEventByBeat,
+}: {
+  mode: GenerationMode;
+  selectedHit: HitShow | null;
+  brief: BriefConfig;
+  projectParams: ProjectParams;
+  characterBio: CharacterBio;
+  beatSequence: BeatInstance[];
+  selectedEventByBeat: Record<string, string>;
+}): GeneratedPlan {
+  const events = selectedEventDetails(beatSequence, selectedEventByBeat);
+  const themes = brief.selectedThemes.length ? brief.selectedThemes.join('、') : '现代情感';
+  const platformText = projectParams.targetPlatforms.join(' / ');
+  const heroineName = characterBio.heroine.split(/[，,]/)[0] || '女主';
+  const heroName = characterBio.hero.split(/[，,]/)[0] || '男主';
+  const firstEvent = events[0]?.event;
+  const bondEvent =
+    events.find(({ beat }) => beat.key === '宿命羁绊')?.event ?? events[1]?.event;
+  const crisisEvent =
+    events.find(({ beat }) => beat.key === '生存危机')?.event ??
+    events[events.length - 2]?.event;
+  const bindEvent =
+    events.find(({ beat }) => beat.key === '绑定关系')?.event ??
+    events[events.length - 1]?.event;
+  const freeEpisode = mode === '爆款迭代' ? '参考爆款' : projectParams.freeEpisode;
+  const heroineWant = cleanSentence(characterBio.heroineWant);
+  const heroineNeed = cleanSentence(characterBio.heroineNeed);
+  const heroGives = cleanSentence(characterBio.heroGives);
+  const bindHook = cleanSentence(
+    bindEvent?.hook.replace('卡在', '') ?? '关系绑定即将公开',
+  );
+
+  const title =
+    mode === '爆款迭代' && selectedHit
+      ? `${selectedHit.title} 的差异化迭代方案`
+      : `${themes.split('、')[0]}${brief.coreBond}短剧方案`;
+  const logline = `${heroineName}在${firstEvent?.title ?? '公开危机'}中被推到绝境。为了${heroineWant}，她被迫与${heroName}建立“${brief.coreBond}”关系；但${bondEvent?.title ?? '隐藏羁绊'}让这段关系从交易变成不可替代，并在第 ${freeEpisode} 集卡到${bindHook}。`;
+  const storySummary = `${projectParams.targetMarket}、${platformText} 的观众需要快速看懂人物低位、关系张力和付费理由。本方案用“${brief.storyType}”做主类型，用“${brief.tone}”控制单集情绪：先让${heroineName}承受${cleanSentence(firstEvent?.functionText ?? '强困境')}，再通过${bondEvent?.title ?? brief.coreBond}把${heroName}引入主线。人物动机来自女主 Want：${heroineWant}；人物弧光来自女主 Need：${heroineNeed}。男主的功能不是单纯救场，而是提供${heroGives}，并在${crisisEvent?.title ?? '生存危机'}中制造保护、误会和占有欲的复合张力。`;
+  const sellingPoints = [
+    themes,
+    brief.storyType,
+    brief.coreBond,
+    brief.tone,
+    `${projectParams.totalEpisodes} 集体量`,
+    `第 ${freeEpisode} 集免费卡点`,
+    `${platformText} 节奏`,
+  ].join('、');
+  const freeHook =
+    mode === '爆款迭代' && selectedHit
+      ? `沿用《${selectedHit.title}》的免费转付费功能：${selectedHit.hook}，但替换为${themes}下的${bindEvent?.title ?? brief.coreBond}。`
+      : `第 ${projectParams.freeEpisode} 集结尾：${cleanSentence(bindEvent?.hook ?? '关系绑定被迫公开')}。${heroineName}刚以为自己能夺回主动权，${heroName}却亮出只有他能解释的关键证据。`;
+  const hookReason = `卡点选择依据：${brief.storyType}需要先压低再兑现，${brief.coreBond}需要在免费段末尾变成不可逆关系；${platformText} 更适合用清晰身份反转、关系公开或强保护欲推动付费。`;
+  const reasoning = [
+    `题材依据：${themes} 决定场景、权力系统和视觉成本。`,
+    `类型依据：${brief.storyType} 决定先虐、反击、追悔或高糖的排序。`,
+    `羁绊依据：${brief.coreBond} 决定男女主为什么不能轻易分开。`,
+    `情绪依据：${brief.tone} 决定每集钩子偏爽、虐、甜、悬疑还是拉扯。`,
+    `人物依据：女主 Want/Need 和男主给予决定冲突目标与关系收益。`,
+    `市场平台依据：${projectParams.targetMarket}、${platformText} 决定前 ${freeEpisode} 集要更快给出身份、关系和付费问题。`,
+    `Beat 依据：${events.map(({ beat, event }) => `${beat.key}=${event?.title ?? '待选事件'}`).join('；')}。`,
+  ];
+  const previewCount = mode === '爆款迭代' ? 8 : Math.max(1, Number(projectParams.freeEpisode) || 8);
+  const episodePreview = Array.from({ length: previewCount }, (_, index) => {
+      const source = events[index % Math.max(1, events.length)];
+      const beat = source?.beat;
+      const event = source?.event;
+      const ep = `${index + 1}`;
+      const isHook = mode !== '爆款迭代' && ep === projectParams.freeEpisode;
+      return [
+        ep,
+        isHook ? '免费卡点' : beat?.key ?? '节奏推进',
+        isHook
+          ? freeHook
+          : `${event?.title ?? beat?.key ?? '关系推进'}：${event?.functionText ?? '承接上一集情绪并推进关系。'}`,
+      ] as [string, string, string];
+    });
+
+  return { title, logline, storySummary, sellingPoints, freeHook, hookReason, reasoning, episodePreview };
+}
 
 type HitShow = {
   id: string;
@@ -779,7 +942,9 @@ export default function Home() {
     Object.fromEntries(initialBeatSequence.map((item) => [item.id, eventPool[item.key][0]?.title ?? ''])),
   );
   const [recommendationOffsetByBeat, setRecommendationOffsetByBeat] = useState<Record<string, number>>({});
-  const [tone, setTone] = useState('强爽感');
+  const [brief, setBrief] = useState<BriefConfig>(initialBriefConfig);
+  const [projectParams, setProjectParams] = useState<ProjectParams>(initialProjectParams);
+  const [characterBio, setCharacterBio] = useState<CharacterBio>(initialCharacterBio);
 
   const selectedInstance =
     beatSequence.find((item) => item.id === selectedBeatId) ?? beatSequence[0];
@@ -904,6 +1069,9 @@ export default function Home() {
                 beatSequence,
                 lockedBeats: locked,
                 selectedEvents: selectedEventByBeat,
+                brief,
+                projectParams,
+                characterBio,
               };
             },
           },
@@ -972,7 +1140,7 @@ export default function Home() {
     }
 
     return () => lifecycle.abort();
-  }, [beatSequence, contentTrack, customHit, locked, mode, productionType, selectedBeat, selectedBeatId, selectedHitId, selectedEventByBeat, step]);
+  }, [beatSequence, brief, characterBio, contentTrack, customHit, locked, mode, productionType, projectParams, selectedBeat, selectedBeatId, selectedEventByBeat, selectedHitId, step]);
 
   return (
     <main className="min-h-screen bg-[#f6f4ef] text-[#201b16]">
@@ -1092,8 +1260,12 @@ export default function Home() {
                 mode={mode}
                 contentTrack={contentTrack}
                 selectedHit={selectedHitId === 'custom-hit' ? customHit : hitShows.find((item) => item.id === selectedHitId) ?? null}
-                tone={tone}
-                setTone={setTone}
+                brief={brief}
+                setBrief={setBrief}
+                projectParams={projectParams}
+                setProjectParams={setProjectParams}
+                characterBio={characterBio}
+                setCharacterBio={setCharacterBio}
                 setStep={setStep}
               />
             )}
@@ -1121,6 +1293,11 @@ export default function Home() {
                 setStep={setStep}
                 mode={mode}
                 selectedHit={selectedHitId === 'custom-hit' ? customHit : hitShows.find((item) => item.id === selectedHitId) ?? null}
+                brief={brief}
+                projectParams={projectParams}
+                characterBio={characterBio}
+                beatSequence={beatSequence}
+                selectedEventByBeat={selectedEventByBeat}
               />
             )}
             {step === 'script' && <ScriptStep />}
@@ -1418,26 +1595,61 @@ function BriefStep({
   mode,
   contentTrack,
   selectedHit,
-  tone,
-  setTone,
+  brief,
+  setBrief,
+  projectParams,
+  setProjectParams,
+  characterBio,
+  setCharacterBio,
   setStep,
 }: {
   productionType: ProductionType;
   mode: GenerationMode;
   contentTrack: ContentTrack;
   selectedHit: HitShow | null;
-  tone: string;
-  setTone: (value: string) => void;
+  brief: BriefConfig;
+  setBrief: React.Dispatch<React.SetStateAction<BriefConfig>>;
+  projectParams: ProjectParams;
+  setProjectParams: React.Dispatch<React.SetStateAction<ProjectParams>>;
+  characterBio: CharacterBio;
+  setCharacterBio: React.Dispatch<React.SetStateAction<CharacterBio>>;
   setStep: (value: StepId) => void;
 }) {
-  const [selectedThemes, setSelectedThemes] = useState<string[]>([
-    '现代豪门',
-    '黑帮家族',
-    '契约婚姻',
-    '身份掉马',
-  ]);
-  const [storyType, setStoryType] = useState('先虐后爽');
-  const [coreBond, setCoreBond] = useState('契约婚姻');
+  const toggleTheme = (item: string) => {
+    setBrief((current) => ({
+      ...current,
+      selectedThemes: current.selectedThemes.includes(item)
+        ? current.selectedThemes.filter((value) => value !== item)
+        : [...current.selectedThemes, item],
+    }));
+  };
+
+  const updateProjectParam = <K extends keyof ProjectParams>(
+    key: K,
+    value: ProjectParams[K],
+  ) => {
+    setProjectParams((current) => ({ ...current, [key]: value }));
+  };
+
+  const togglePlatform = (platform: string) => {
+    setProjectParams((current) => {
+      const selected = current.targetPlatforms.includes(platform);
+      const nextPlatforms = selected
+        ? current.targetPlatforms.filter((item) => item !== platform)
+        : [...current.targetPlatforms, platform];
+      return {
+        ...current,
+        targetPlatforms: nextPlatforms.length ? nextPlatforms : current.targetPlatforms,
+      };
+    });
+  };
+
+  const updateCharacterBio = <K extends keyof CharacterBio>(
+    key: K,
+    value: CharacterBio[K],
+  ) => {
+    setCharacterBio((current) => ({ ...current, [key]: value }));
+  };
 
   const costFields =
     productionType === 'AI 剧'
@@ -1474,14 +1686,8 @@ function BriefStep({
               title="题材 / 世界观 · 可替换"
               hint="选择新的世界规则和故事舞台，事件功能与节奏仍沿用参考剧。"
               items={themeTags}
-              selected={selectedThemes}
-              onToggle={(item) =>
-                setSelectedThemes((items) =>
-                  items.includes(item)
-                    ? items.filter((value) => value !== item)
-                    : [...items, item],
-                )
-              }
+              selected={brief.selectedThemes}
+              onToggle={toggleTheme}
             />
             <LockedDimension title="类型 · 继承参考爆款" value="先虐后爽 / 复仇打脸" />
             <LockedDimension title="核心羁绊 · 继承参考爆款" value="契约婚姻 + 救命恩人" />
@@ -1510,37 +1716,31 @@ function BriefStep({
               title="1. 题材 / 世界观"
               hint="可多选。先选故事发生在哪里、受什么规则约束。"
               items={themeTags}
-              selected={selectedThemes}
-              onToggle={(item) =>
-                setSelectedThemes((items) =>
-                  items.includes(item)
-                    ? items.filter((value) => value !== item)
-                    : [...items, item],
-                )
-              }
+              selected={brief.selectedThemes}
+              onToggle={toggleTheme}
             />
             <DimensionBlock
               title="2. 类型"
               hint="确定观众期待的核心情感模式，建议先选一个主类型。"
               items={storyTypes}
-              selected={[storyType]}
-              onToggle={setStoryType}
+              selected={[brief.storyType]}
+              onToggle={(value) => setBrief((current) => ({ ...current, storyType: value }))}
               single
             />
             <DimensionBlock
               title="3. 核心羁绊"
               hint="回答男女主为什么会产生连接，以及为什么不能轻易分开。"
               items={coreBonds}
-              selected={[coreBond]}
-              onToggle={setCoreBond}
+              selected={[brief.coreBond]}
+              onToggle={(value) => setBrief((current) => ({ ...current, coreBond: value }))}
               single
             />
             <DimensionBlock
               title="4. 情绪"
               hint="确定每集的观看感受和付费驱动力。"
               items={emotionModes}
-              selected={[tone]}
-              onToggle={setTone}
+              selected={[brief.tone]}
+              onToggle={(value) => setBrief((current) => ({ ...current, tone: value }))}
               single
             />
           </div>
@@ -1548,24 +1748,86 @@ function BriefStep({
       )}
 
       <Panel title="项目参数">
-        <div className="grid grid-cols-3 gap-3 max-md:grid-cols-1">
-          <Field label="目标市场" value="北美 / 英语区" />
-          <Field label="目标平台" value="ReelShort / DramaBox" />
+        <div className="grid grid-cols-2 gap-4 max-lg:grid-cols-1">
+          <SelectField
+            label="目标市场"
+            value={projectParams.targetMarket}
+            options={marketOptions}
+            onChange={(value) => updateProjectParam('targetMarket', value)}
+          />
           <Field label="生产类型" value={productionType} />
-          <Field label="总集数" value={mode === '爆款迭代' ? '继承参考爆款' : '60 集（可选 40-80）'} />
-          <Field label="免费集" value={mode === '爆款迭代' ? '继承参考爆款' : '第 8 集（可选 6-10）'} />
-          <Field label="单集长度" value={mode === '爆款迭代' ? '继承参考爆款' : '默认 1000 字以内'} />
+          <MultiSelectField
+            label="目标平台"
+            options={platformOptions}
+            selected={projectParams.targetPlatforms}
+            onToggle={togglePlatform}
+          />
+          {mode === '爆款迭代' ? (
+            <>
+              <Field label="总集数" value="继承参考爆款" />
+              <Field label="免费集" value="继承参考爆款" />
+              <SelectField
+                label="单集长度"
+                value={projectParams.episodeLength}
+                options={episodeLengthOptions}
+                onChange={(value) => updateProjectParam('episodeLength', value)}
+              />
+            </>
+          ) : (
+            <>
+              <SegmentedField
+                label="总集数"
+                options={totalEpisodeOptions}
+                value={projectParams.totalEpisodes}
+                suffix="集"
+                onChange={(value) => updateProjectParam('totalEpisodes', value)}
+              />
+              <SegmentedField
+                label="免费卡点集"
+                options={freeEpisodeOptions}
+                value={projectParams.freeEpisode}
+                suffix="集"
+                onChange={(value) => updateProjectParam('freeEpisode', value)}
+              />
+              <SelectField
+                label="单集长度"
+                value={projectParams.episodeLength}
+                options={episodeLengthOptions.filter((item) => item !== '按参考爆款')}
+                onChange={(value) => updateProjectParam('episodeLength', value)}
+              />
+            </>
+          )}
         </div>
       </Panel>
 
       <div className="grid grid-cols-2 gap-5 max-lg:grid-cols-1">
         <Panel title="人物小传">
           <div className="grid gap-3">
-            <Field label="女主" value="Natalie，破产家族继承人，被未婚夫设计骗婚。" />
-            <Field label="女主 Want" value="拿回母亲留下的信托，摆脱父亲债务。" />
-            <Field label="女主 Need" value="重新获得安全感、尊严和人生掌控权。" />
-            <Field label="男主" value="Alessio，危险的黑帮继承人，掌握权力但背负家族诅咒。" />
-            <Field label="男主给予" value="庇护、身份转换、复仇资源、权力背书。" />
+            <EditableInfoBlock
+              label="女主"
+              value={characterBio.heroine}
+              onChange={(value) => updateCharacterBio('heroine', value)}
+            />
+            <EditableField
+              label="女主 Want"
+              value={characterBio.heroineWant}
+              onChange={(value) => updateCharacterBio('heroineWant', value)}
+            />
+            <EditableField
+              label="女主 Need"
+              value={characterBio.heroineNeed}
+              onChange={(value) => updateCharacterBio('heroineNeed', value)}
+            />
+            <EditableInfoBlock
+              label="男主"
+              value={characterBio.hero}
+              onChange={(value) => updateCharacterBio('hero', value)}
+            />
+            <EditableField
+              label="男主给予"
+              value={characterBio.heroGives}
+              onChange={(value) => updateCharacterBio('heroGives', value)}
+            />
           </div>
         </Panel>
         <Panel title={productionType === 'AI 剧' ? 'AI 制作约束' : '真人拍摄约束'}>
@@ -1831,25 +2093,50 @@ function ResultStep({
   setStep,
   mode,
   selectedHit,
+  brief,
+  projectParams,
+  characterBio,
+  beatSequence,
+  selectedEventByBeat,
 }: {
   setStep: (value: StepId) => void;
   mode: GenerationMode;
   selectedHit: HitShow | null;
+  brief: BriefConfig;
+  projectParams: ProjectParams;
+  characterBio: CharacterBio;
+  beatSequence: BeatInstance[];
+  selectedEventByBeat: Record<string, string>;
 }) {
-  const [logline, setLogline] = useState(
-    '婚礼当天被未婚夫背叛的新娘，意外救下被追杀的黑帮继承人，却发现自己是解除他家族诅咒的唯一钥匙。',
+  const generatedPlan = useMemo(
+    () =>
+      buildGeneratedPlan({
+        mode,
+        selectedHit,
+        brief,
+        projectParams,
+        characterBio,
+        beatSequence,
+        selectedEventByBeat,
+      }),
+    [beatSequence, brief, characterBio, mode, projectParams, selectedEventByBeat, selectedHit],
   );
-  const [storySummary, setStorySummary] = useState(
-    'Natalie 原本以为婚礼能拯救破产家族，却在婚礼前听见未婚夫和继妹合谋骗取信托。她被追杀中的 Alessio 卷入危险关系，随后发现母亲留下的纹章与 Moretti 家族诅咒有关。为了夺回继承权，她接受契约婚姻，也把自己推向一个更危险、更迷人的男人。',
-  );
-  const [sellingPoints, setSellingPoints] = useState(
-    '婚礼背叛、危险男人救场、契约婚姻、家族诅咒、女主身份价值反转。',
-  );
-  const [freeHook, setFreeHook] = useState('女主即将签下婚姻协议时，母亲纹章亮起');
+  const [logline, setLogline] = useState(generatedPlan.logline);
+  const [storySummary, setStorySummary] = useState(generatedPlan.storySummary);
+  const [sellingPoints, setSellingPoints] = useState(generatedPlan.sellingPoints);
+  const [freeHook, setFreeHook] = useState(generatedPlan.freeHook);
   const [evaluationStatus, setEvaluationStatus] = useState<'已评估' | '待重新评估'>('已评估');
   const [evaluationVersion, setEvaluationVersion] = useState(1);
 
   const markEdited = () => setEvaluationStatus('待重新评估');
+  const regeneratePlan = () => {
+    setLogline(generatedPlan.logline);
+    setStorySummary(generatedPlan.storySummary);
+    setSellingPoints(generatedPlan.sellingPoints);
+    setFreeHook(generatedPlan.freeHook);
+    setEvaluationStatus('已评估');
+    setEvaluationVersion((version) => version + 1);
+  };
   const reevaluate = () => {
     setEvaluationStatus('已评估');
     setEvaluationVersion((version) => version + 1);
@@ -1871,7 +2158,7 @@ function ResultStep({
         </div>
       )}
       <div className="grid grid-cols-[1fr_320px] gap-5 max-xl:grid-cols-1">
-        <Panel title="方案 A：The Bride Claimed by the Cursed Heir">
+        <Panel title={`方案 A：${generatedPlan.title}`}>
           <div className="space-y-4">
             <EditableInfoBlock
               label="Logline"
@@ -1893,21 +2180,26 @@ function ResultStep({
             <span className={`text-sm ${evaluationStatus === '已评估' ? 'text-[#4d7b4a]' : 'text-[#9d321d]'}`}>
               {evaluationStatus} · 第 {evaluationVersion} 次方案评估
             </span>
-            <button onClick={reevaluate} className="rounded-md bg-[#201b16] px-3 py-2 text-sm font-semibold text-white">
-              重新评估方案
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={regeneratePlan} className="rounded-md border border-[#201b16] bg-white px-3 py-2 text-sm font-semibold text-[#201b16]">
+                根据当前 Brief 重新生成
+              </button>
+              <button onClick={reevaluate} className="rounded-md bg-[#201b16] px-3 py-2 text-sm font-semibold text-white">
+                重新评估方案
+              </button>
+            </div>
           </div>
         </Panel>
         <Panel title="免费卡点">
           <div className="rounded-lg bg-[#201b16] p-4 text-white">
-            <p className="text-xs text-[#d7c7b4]">第 8 集结尾</p>
+            <p className="text-xs text-[#d7c7b4]">第 {mode === '爆款迭代' ? '参考爆款' : projectParams.freeEpisode} 集结尾</p>
             <textarea
               value={freeHook}
               onChange={(event) => { setFreeHook(event.target.value); markEdited(); }}
               className="mt-1 min-h-16 w-full resize-y bg-transparent text-lg font-semibold text-white outline-none placeholder:text-[#d7c7b4]"
             />
             <p className="mt-3 text-sm leading-6 text-[#eadfce]">
-              观众已经想看女主复仇，也想知道她与男主诅咒的关系。卡在“签还是不签”的瞬间，付费驱动力来自身份谜团和关系绑定。
+              {generatedPlan.hookReason}
             </p>
           </div>
           <div className="mt-4 grid gap-2 text-sm">
@@ -1917,18 +2209,18 @@ function ResultStep({
           </div>
         </Panel>
       </div>
+      <Panel title="生成依据">
+        <div className="grid gap-2 text-sm">
+          {generatedPlan.reasoning.map((item) => (
+            <div key={item} className="rounded-md bg-[#f8f2e9] px-3 py-2 leading-6 text-[#5d5147]">
+              {item}
+            </div>
+          ))}
+        </div>
+      </Panel>
       <Panel title="到免费集的节奏预览">
         <div className="grid grid-cols-4 gap-3 max-xl:grid-cols-2 max-md:grid-cols-1">
-          {[
-            ['1', '婚礼背叛', '羞辱 + 追杀闯入'],
-            ['2', '男主救场', '公开占有宣告'],
-            ['3', '契约提出', '母亲纹章出现'],
-            ['4', '进入庄园', '女主被家族审视'],
-            ['5', '前任反扑', '女主第一次反击'],
-            ['6', '诅咒试探', '男主失控只有她能靠近'],
-            ['7', '继妹设局', '女主被迫背锅'],
-            ['8', '免费卡点', '签约前纹章亮起'],
-          ].map(([ep, title, text]) => (
+          {generatedPlan.episodePreview.map(([ep, title, text]) => (
             <div key={ep} className="rounded-lg border border-[#ded6c8] bg-white p-3">
               <p className="text-xs font-semibold text-[#9d321d]">第 {ep} 集</p>
               <p className="mt-1 font-semibold">{title}</p>
@@ -2289,15 +2581,127 @@ function Field({ label, value }: { label: string; value: string }) {
   );
 }
 
-function EditableField({ label, value }: { label: string; value: string }) {
+function EditableField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange?: (value: string) => void;
+}) {
   return (
     <label className="block">
       <span className="text-xs font-medium text-[#817363]">{label}</span>
       <input
-        defaultValue={value}
+        value={value}
+        onChange={(event) => onChange?.(event.target.value)}
         className="mt-1 block w-full rounded-md border border-[#d8cdbc] bg-[#fffdf9] px-3 py-2 text-sm outline-none focus:border-[#cf4f35]"
       />
     </label>
+  );
+}
+
+function SelectField({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: string[];
+  onChange: (value: string) => void;
+}) {
+  return (
+    <label className="block">
+      <span className="text-xs font-medium text-[#817363]">{label}</span>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="mt-1 block w-full rounded-md border border-[#d8cdbc] bg-[#fffdf9] px-3 py-2 text-sm outline-none focus:border-[#cf4f35]"
+      >
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
+function SegmentedField({
+  label,
+  options,
+  value,
+  suffix,
+  onChange,
+}: {
+  label: string;
+  options: string[];
+  value: string;
+  suffix: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div>
+      <span className="text-xs font-medium text-[#817363]">{label}</span>
+      <div className="mt-1 grid grid-cols-5 gap-1 rounded-md border border-[#d8cdbc] bg-[#fffdf9] p-1">
+        {options.map((option) => (
+          <button
+            key={option}
+            type="button"
+            onClick={() => onChange(option)}
+            className={`rounded px-2 py-1.5 text-sm font-medium ${
+              value === option ? 'bg-[#201b16] text-white' : 'text-[#64584c] hover:bg-[#f8f2e9]'
+            }`}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
+      <p className="mt-1 text-xs text-[#817363]">当前：第 {value} {suffix}</p>
+    </div>
+  );
+}
+
+function MultiSelectField({
+  label,
+  options,
+  selected,
+  onToggle,
+}: {
+  label: string;
+  options: string[];
+  selected: string[];
+  onToggle: (value: string) => void;
+}) {
+  return (
+    <div>
+      <span className="text-xs font-medium text-[#817363]">{label}</span>
+      <div className="mt-1 flex flex-wrap gap-2 rounded-md border border-[#d8cdbc] bg-[#fffdf9] p-2">
+        {options.map((option) => {
+          const active = selected.includes(option);
+          return (
+            <button
+              key={option}
+              type="button"
+              onClick={() => onToggle(option)}
+              className={`rounded-full border px-2.5 py-1 text-xs font-medium ${
+                active
+                  ? 'border-[#cf4f35] bg-[#fff0ea] text-[#9d321d]'
+                  : 'border-[#d8cdbc] bg-white text-[#64584c] hover:border-[#bcae9a]'
+              }`}
+            >
+              {active ? '✓ ' : ''}
+              {option}
+            </button>
+          );
+        })}
+      </div>
+      <p className="mt-1 text-xs text-[#817363]">当前：{selected.join(' / ')}</p>
+    </div>
   );
 }
 
